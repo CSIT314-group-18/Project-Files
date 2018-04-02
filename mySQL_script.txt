@@ -37,10 +37,10 @@ CREATE TABLE reservation (
     status VARCHAR(50) NOT NULL,
     startdate DATETIME NOT NULL,
     enddate DATETIME NOT NULL,
-	cost DOUBLE NOT NULL,
-	fee DOUBLE NOT NULL,
+    cost DOUBLE NOT NULL,
+    fee DOUBLE NOT NULL,
     renter INT NOT NULL FOREIGN KEY REFERENCES user(user_id),
-	rentee INT NOT NULL FOREIGN KEY REFERENCES user(user_id)
+    rentee INT NOT NULL FOREIGN KEY REFERENCES user(user_id)
     car_id INT FOREIGN KEY REFERENCES car(car_id)
 );
 
