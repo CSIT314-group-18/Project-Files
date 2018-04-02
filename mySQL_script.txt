@@ -35,16 +35,18 @@ CREATE TABLE location (
 CREATE TABLE reservation (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     status VARCHAR(50) NOT NULL,
-    startdate DATE NOT NULL,
-    enddate DATE NOT NULL,
-    user_id INT FOREIGN KEY REFERENCES user(user_id),
+    startdate DATETIME NOT NULL,
+    enddate DATETIME NOT NULL,
+	cost DOUBLE NOT NULL,
+	fee DOUBLE NOT NULL,
+    renter INT NOT NULL FOREIGN KEY REFERENCES user(user_id),
+	rentee INT NOT NULL FOREIGN KEY REFERENCES user(user_id)
     car_id INT FOREIGN KEY REFERENCES car(car_id)
 );
 
 CREATE TABLE message (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    message VARCHAR(255) NOT NULL,
+    content VARCHAR(255) NOT NULL,
     sentby INT NOT NULL FOREIGN KEY REFERENCES user(user_id),
     sentto INT NOT NULL FOREIGN KEY REFERENCES user(user_id)
 );
-
