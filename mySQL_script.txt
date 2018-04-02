@@ -1,6 +1,50 @@
-CREATE TABLE users (
+CREATE TABLE user (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    verifed INT CHECK(verified = 0 || verified = 1) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    location_id INT FOREIGN KEY REFERENCES location(location_id)
 );
+
+CREATE TABLE admin (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_id INT FOREIGN KEY REFERENCES user(user_id)
+);
+
+CREATE TABLE car (
+    id INT NOT NULL PRIMARY KEY AUT0_INCREMENT,
+    image INT NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    manufacturer VARCHAR(50) NOT NULL,
+    transmission VARCHAR(50) NOT NULL,
+    odometer INT NOT NULL,
+    user_id INT FOREIGN KEY REFERENCES user(user_id)
+);
+
+CREATE TABLE location (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    street VARCHAR(50) NOT NULL,
+    suburb VARCHAR(50) NOT NULL,
+    postcode VARCHAR(50) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    country VARCHAR(50) NOT NULL,
+    user_id INT FOREIGN KEY REFERENCES user(user_id)
+);
+
+CREATE TABLE reservation (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    status VARCHAR(50) NOT NULL,
+    startdate DATE NOT NULL,
+    enddate DATE NOT NULL,
+    user_id INT FOREIGN KEY REFERENCES user(user_id),
+    car_id INT FOREIGN KEY REFERENCES car(car_id)
+);
+
+CREATE TABLE message (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    message VARCHAR(255) NOT NULL,
+    sentby INT NOT NULL FOREIGN KEY REFERENCES user(user_id),
+    sentto INT NOT NULL FOREIGN KEY REFERENCES user(user_id)
+);
+
