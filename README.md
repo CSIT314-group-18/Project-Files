@@ -16,3 +16,11 @@ to create the sql columns of users and passwords in your db 'demo'
 Transfer the early php pages from the repository into the 'htdocs' folder in the installation folder of xampp
 
 Type in your browser 'loaclahost/register.php' and look at the magic work
+
+Creating the database:
+0. Assuming you haven't created a database yet: click new, name it "demo" and click "Create".
+1. While in database "demo", copy the code in the file SQL.sql into the SQL tab and click "Go". This creates the tables.
+2. Copy the code from AddFKs.sql into the SQL tab and click "Go". This adds foreign keys.
+3. If for whatever reason you need to delete any tables, the easiest way is to drop the entire database. This is done by going into the SQL tab in "demo" and typing: 
+DROP DATABASE demo;
+After this refer to step 0 again.
