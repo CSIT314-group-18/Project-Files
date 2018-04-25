@@ -18,6 +18,7 @@ Transfer the early php pages from the repository into the 'htdocs' folder in the
 Type in your browser 'loaclahost/register.php' and look at the magic work
 
 Creating the database:
+
 0. Assuming you haven't created a database yet: click new, name it "demo" and click "Create".
 1. While in database "demo", copy the code in the file SQL.sql into the SQL tab and click "Go". This creates the tables.
 2. Copy the code from AddFKs.sql into the SQL tab and click "Go". This adds foreign keys.
