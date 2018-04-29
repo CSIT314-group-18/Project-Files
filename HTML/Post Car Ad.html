@@ -1,0 +1,687 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+    <head>
+        
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+<title>Publish a listing - Rentarro</title>
+<meta name="title" content="Publish a listing - Rentarro" />
+<meta http-equiv="Cache-Control" content="no-cache" />
+<meta http-equiv="Expires" content="Fri, Jan 01 1970 00:00:00 GMT" />
+
+<meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<!-- favicon -->
+<link rel="shortcut icon" href="http://localhost/osclass/oc-content/themes/bender/favicon/favicon-48.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost/osclass/oc-content/themes/bender/favicon/favicon-144.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://localhost/osclass/oc-content/themes/bender/favicon/favicon-114.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://localhost/osclass/oc-content/themes/bender/favicon/favicon-72.png">
+<link rel="apple-touch-icon-precomposed" href="http://localhost/osclass/oc-content/themes/bender/favicon/favicon-57.png">
+<!-- /favicon -->
+
+<link href="http://localhost/osclass/oc-content/themes/bender/js/jquery-ui/jquery-ui-1.10.2.custom.min.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript">
+    var bender = window.bender || {};
+    bender.base_url = 'http://localhost/osclass/index.php';
+    bender.langs = {"delete":"Delete","cancel":"Cancel"};
+    bender.fancybox_prev = 'Previous image';
+    bender.fancybox_next = 'Next image';
+    bender.fancybox_closeBtn = 'Close';
+</script>
+<link href="http://localhost/osclass/oc-content/themes/bender/css/main.css" rel="stylesheet" type="text/css" />
+<meta name="generator" content="Osclass 3.7.4" /><meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="googlebot" content="noindex, nofollow, noarchive" />
+<link href="http://localhost/osclass/oc-content/themes/bender/js/fancybox/jquery.fancybox.css" rel="stylesheet" type="text/css" />
+<link href="http://localhost/osclass/oc-content/themes/bender/css/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+<link href="http://localhost/osclass/oc-includes/osclass/assets/js/fineuploader/fineuploader.css" rel="stylesheet" type="text/css" />
+<link href="http://localhost/osclass/oc-content/themes/bender/css/ajax-uploader.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/jquery.min.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-content/themes/bender/js/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/date.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/fineuploader/jquery.fineuploader.min.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http://localhost/osclass/oc-content/themes/bender/js/global.js"></script>
+    </head>
+<body class="item item-post">
+<div id="header">
+    <!-- header ad 728x60-->
+    <div class="ads_header">
+        <!-- /header ad 728x60-->
+    </div>
+    <div class="clear"></div>
+    <div class="wrapper">
+        <div id="logo">
+            <a href="http://localhost/osclass/">Rentarro</a>            <span id="description"></span>
+        </div>
+        <ul class="nav">
+                                                    <li><a id="login_open" href="http://localhost/osclass/index.php?page=login">Login</a></li>
+                                    <li><a href="http://localhost/osclass/index.php?page=register&action=register">Register for a free account</a></li>
+                                                                <li class="publish"><a href="http://localhost/osclass/index.php?page=item&action=item_add">Publish your ad for free</a></li>
+                    </ul>
+
+    </div>
+    </div>
+<div class="wrapper wrapper-flash">
+            <div class="breadcrumb">
+            <ul class="breadcrumb">
+<li class="first-child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" ><a href="http://localhost/osclass/" itemprop="url"><span itemprop="title">Rentarro</span></a></li>
+
+<li class="last-child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" > &raquo; <span itemprop="title">Publish a listing</span></li>
+</ul>
+            <div class="clear"></div>
+        </div>
+        </div>
+<div class="wrapper" id="content">
+        <div id="main">
+                <script type="text/javascript">
+    $(document).ready(function(){
+        $("#countryId").on("change",function(){
+            var pk_c_code = $(this).val();
+                            var url = 'http://localhost/osclass/index.php?page=ajax&action=regions&countryId=' + pk_c_code;
+                        var result = '';
+
+            if(pk_c_code != '') {
+
+                $("#regionId").attr('disabled',false);
+                $("#cityId").attr('disabled',true);
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: 'json',
+                    success: function(data){
+                        var length = data.length;
+
+                        if(length > 0) {
+
+                            result += '<option selected value="">Select a region...</option>';
+                            for(key in data) {
+                                result += '<option value="' + data[key].pk_i_id + '">' + data[key].s_name + '</option>';
+                            }
+
+                            $("#region").before('<select name="regionId" id="regionId" ></select>');
+                            $("#region").remove();
+
+                            $("#city").before('<select name="cityId" id="cityId" ></select>');
+                            $("#city").remove();
+
+                            $("#regionId").val("");
+
+                        } else {
+
+                            $("#regionId").before('<input type="text" name="region" id="region" />');
+                            $("#regionId").remove();
+
+                            $("#cityId").before('<input type="text" name="city" id="city" />');
+                            $("#cityId").remove();
+
+                        }
+
+                        $("#regionId").html(result);
+                        $("#cityId").html('<option selected value="">Select a city...</option>');
+                        $("#regionId").trigger('change');
+                        $("#cityId").trigger('change');
+                    }
+                 });
+
+             } else {
+
+                 // add empty select
+                 $("#region").before('<select name="regionId" id="regionId" ><option value="">Select a region...</option></select>');
+                 $("#region").remove();
+
+                 $("#city").before('<select name="cityId" id="cityId" ><option value="">Select a city...</option></select>');
+                 $("#city").remove();
+
+                 if( $("#regionId").length > 0 ){
+                     $("#regionId").html('<option value="">Select a region...</option>');
+                 } else {
+                     $("#region").before('<select name="regionId" id="regionId" ><option value="">Select a region...</option></select>');
+                     $("#region").remove();
+                 }
+                 if( $("#cityId").length > 0 ){
+                     $("#cityId").html('<option value="">Select a city...</option>');
+                 } else {
+                     $("#city").before('<select name="cityId" id="cityId" ><option value="">Select a city...</option></select>');
+                     $("#city").remove();
+                 }
+                 $("#regionId").attr('disabled',true);
+                 $("#cityId").attr('disabled',true);
+             }
+        });
+
+        $("#regionId").on("change",function(){
+            var pk_c_code = $(this).val();
+                            var url = 'http://localhost/osclass/index.php?page=ajax&action=cities&regionId=' + pk_c_code;
+            
+            var result = '';
+
+            if(pk_c_code != '') {
+
+                $("#cityId").attr('disabled',false);
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: 'json',
+                    success: function(data){
+                        var length = data.length;
+                        if(length > 0) {
+                            result += '<option selected value="">Select a city...</option>';
+                            for(key in data) {
+                                result += '<option value="' + data[key].pk_i_id + '">' + data[key].s_name + '</option>';
+                            }
+
+                            $("#city").before('<select name="cityId" id="cityId" ></select>');
+                            $("#city").remove();
+                        } else {
+                            result += '<option value="">No results</option>';
+                            $("#cityId").before('<input type="text" name="city" id="city" />');
+                            $("#cityId").remove();
+                        }
+                        $("#cityId").html(result);
+                        $("#cityId").trigger('change');
+                    }
+                 });
+             } else {
+                $("#cityId").attr('disabled',true);
+             }
+        });
+
+        if( $("#regionId").attr('value') == "") {
+            $("#cityId").attr('disabled',true);
+        }
+
+        if($("#countryId").length != 0) {
+            if( $("#countryId").prop('type').match(/select-one/) ) {
+                if( $("#countryId").attr('value') == "") {
+                    $("#regionId").attr('disabled',true);
+                }
+            }
+        }
+
+        /**
+         * Validate form
+         */
+
+        // Validate description without HTML.
+        $.validator.addMethod(
+            "minstriptags",
+            function(value, element) {
+                altered_input = strip_tags(value);
+                if (altered_input.length < 3) {
+                    return false;
+                } else {
+                    return true;
+                }
+            },
+            "Description needs to be longer."
+        );
+
+        // Code for form validation
+        $("form[name=item]").validate({
+            rules: {
+                catId: {
+                    required: true,
+                    digits: true
+                },
+                                price: {
+                    maxlength: 15
+                },
+                currency: "required",
+                                                "photos[]": {
+                    accept: "png,gif,jpg,jpeg"
+                },
+                                                contactName: {
+                    minlength: 3,
+                    maxlength: 35
+                },
+                contactEmail: {
+                    required: true,
+                    email: true
+                },
+                                regionId: {
+                    required: true,
+                    digits: true
+                },
+                cityId: {
+                    required: true,
+                    digits: true
+                },
+                cityArea: {
+                    minlength: 3,
+                    maxlength: 50
+                },
+                address: {
+                    minlength: 3,
+                    maxlength: 100
+                }
+            },
+            messages: {
+                catId: "Choose one category.",
+                                price: {
+                    maxlength: "Price: no more than 50 characters."
+                },
+                currency: "Currency: make your selection.",
+                                                "photos[]": {
+                    accept: "Photo: must be png,gif,jpg,jpeg."
+                },
+                                                contactName: {
+                    minlength: "Name: enter at least 3 characters.",
+                    maxlength: "Name: no more than 35 characters."
+                },
+                contactEmail: {
+                    required: "Email: this field is required.",
+                    email: "Invalid email address."
+                },
+                                regionId: "Select a region.",
+                cityId: "Select a city.",
+                cityArea: {
+                    minlength: "City area: enter at least 3 characters.",
+                    maxlength: "City area: no more than 50 characters."
+                },
+                address: {
+                    minlength: "Address: enter at least 3 characters.",
+                    maxlength: "Address: no more than 100 characters."
+                }
+            },
+            errorLabelContainer: "#error_list",
+            wrapper: "li",
+            invalidHandler: function(form, validator) {
+                $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
+            },
+            submitHandler: function(form){
+                $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
+                setTimeout("$('button[type=submit], input[type=submit]').removeAttr('disabled')", 5000);
+                form.submit();
+            }
+        });
+    });
+
+    /**
+     * Strip HTML tags to count number of visible characters.
+     */
+    function strip_tags(html) {
+        if (arguments.length < 3) {
+            html=html.replace(/<\/?(?!\!)[^>]*>/gi, '');
+        } else {
+            var allowed = arguments[1];
+            var specified = eval("["+arguments[2]+"]");
+            if (allowed){
+                var regex='</?(?!(' + specified.join('|') + '))\b[^>]*>';
+                html=html.replace(new RegExp(regex, 'gi'), '');
+            } else{
+                var regex='</?(' + specified.join('|') + ')\b[^>]*>';
+                html=html.replace(new RegExp(regex, 'gi'), '');
+            }
+        }
+        return html;
+    }
+
+    function delete_image(id, item_id,name, secret) {
+        //alert(id + " - "+ item_id + " - "+name+" - "+secret);
+        var result = confirm('This action can\'t be undone. Are you sure you want to continue?');
+        if(result) {
+            $.ajax({
+                type: "POST",
+                url: 'http://localhost/osclass/index.php?page=ajax&action=delete_image&id='+id+'&item='+item_id+'&code='+name+'&secret='+secret,
+                dataType: 'json',
+                success: function(data){
+                    var class_type = "error";
+                    if(data.success) {
+                        $("div[name="+name+"]").remove();
+                        class_type = "ok";
+                    }
+                    var flash = $("#flash_js");
+                    var message = $('<div>').addClass('pubMessages').addClass(class_type).attr('id', 'flashmessage').html(data.msg);
+                    flash.html(message);
+                    $("#flashmessage").slideDown('slow').delay(3000).slideUp('slow');
+                }
+            });
+        }
+    }
+
+
+</script>
+    <div class="form-container form-horizontal">
+        <div class="resp-wrapper">
+            <div class="header">
+                <h1>Publish a listing</h1>
+            </div>
+            <ul id="error_list"></ul>
+                <form name="item" action="http://localhost/osclass/index.php" method="post" enctype="multipart/form-data" id="item-post"><input type='hidden' name='CSRFName' value='CSRF1514262285_1543911466' />
+        <input type='hidden' name='CSRFToken' value='ee72106f978c683497804a6d0eca3ba66e669ff7a394025df366a6bbfa93d40ba9aef1ad80cdef190443e407bca1a2035730ab14cff91d664c787acfd3632c04' />
+                    <fieldset>
+                    <input type="hidden" name="action" value="item_add_post" />
+                        <input type="hidden" name="page" value="item" />
+                                            <h2>General Information</h2>
+                        <div class="control-group">
+                            <label class="control-label" for="select_1">Category</label>
+                            <div class="controls">
+                                <select name="catId" id="catId"><option value="">Select a category</option><option value="4">Car Rental</option><option value="47">&nbsp;&nbsp;Car Rentals</option><option value="51">&nbsp;&nbsp;Looking for Car Rental</option></select>                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="title[en_US]">Title</label>
+                            <div class="controls">
+                                <input id="titleen_US" type="text" name="title[en_US]" value="" />                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="description[en_US]">Description</label>
+                            <div class="controls">
+                                <textarea id="descriptionen_US" name="description[en_US]" rows="10"></textarea>                            </div>
+                        </div>
+                                                <div class="control-group control-group-price">
+                            <label class="control-label" for="price">Price</label>
+                            <div class="controls">
+                                <input id="price" type="text" name="price" value="" />                                <input id="currency" type="hidden" name="currency" value="USD" />AU$ per day                            </div>
+                        </div>
+                                                            <div id="restricted-fine-uploader"></div>
+            <div style="clear:both;"></div>
+                        <div style="clear:both;"></div>
+            
+            <script>
+                $(document).ready(function() {
+
+                    $('.qq-upload-delete').on('click', function(evt) {
+                        evt.preventDefault();
+                        var parent = $(this).parent()
+                        var result = confirm('This action can\'t be undone. Are you sure you want to continue?');
+                        var urlrequest = '';
+                        if($(this).attr('ajaxfile')!=undefined) {
+                            urlrequest = 'ajax_photo='+$(this).attr('ajaxfile');
+                        } else {
+                            urlrequest = 'id='+$(this).attr('photoid')+'&item='+$(this).attr('itemid')+'&code='+$(this).attr('photoname')+'&secret='+$(this).attr('photosecret');
+                        }
+                        if(result) {
+                            $.ajax({
+                                type: "POST",
+                                url: 'http://localhost/osclass/index.php?page=ajax&action=delete_image&'+urlrequest,
+                                dataType: 'json',
+                                success: function(data){
+                                    parent.remove();
+                                }
+                            });
+                        }
+                    });
+
+                    $('#restricted-fine-uploader').on('click','.primary_image', function(event){
+                        if(parseInt($("div.primary_image").index(this))>0){
+
+                            var a_src   = $(this).parent().find('.ajax_preview_img img').attr('src');
+                            var a_title = $(this).parent().find('.ajax_preview_img img').attr('alt');
+                            var a_input = $(this).parent().find('input').attr('value');
+                            // info
+                            var a1 = $(this).parent().find('span.qq-upload-file').text();
+                            var a2 = $(this).parent().find('span.qq-upload-size').text();
+
+                            var li_first =  $('ul.qq-upload-list li').get(0);
+
+                            var b_src   = $(li_first).find('.ajax_preview_img img').attr('src');
+                            var b_title = $(li_first).find('.ajax_preview_img img').attr('alt');
+                            var b_input = $(li_first).find('input').attr('value');
+                            var b1      = $(li_first).find('span.qq-upload-file').text();
+                            var b2      = $(li_first).find('span.qq-upload-size').text();
+
+                            $(li_first).find('.ajax_preview_img img').attr('src', a_src);
+                            $(li_first).find('.ajax_preview_img img').attr('alt', a_title);
+                            $(li_first).find('input').attr('value', a_input);
+                            $(li_first).find('span.qq-upload-file').text(a1);
+                            $(li_first).find('span.qq-upload-size').text(a2);
+
+                            $(this).parent().find('.ajax_preview_img img').attr('src', b_src);
+                            $(this).parent().find('.ajax_preview_img img').attr('alt', b_title);
+                            $(this).parent().find('input').attr('value', b_input);
+                            $(this).parent().find('span.qq-upload-file').text(b1);
+                            $(this).parent().find('span.qq-upload-file').text(b2);
+                        }
+                    });
+
+                    $('#restricted-fine-uploader').on('click','.primary_image', function(event){
+                        $(this).addClass('over primary');
+                    });
+
+                    $('#restricted-fine-uploader').on('mouseenter mouseleave','.primary_image', function(event){
+                        if(event.type=='mouseenter') {
+                            if(!$(this).hasClass('primary')) {
+                                $(this).addClass('primary');
+                            }
+                        } else {
+                            if(parseInt($("div.primary_image").index(this))>0){
+                                $(this).removeClass('primary');
+                            }
+                        }
+                    });
+
+
+                    $('#restricted-fine-uploader').on('mouseenter mouseleave','li.qq-upload-success', function(event){
+                        if(parseInt($("li.qq-upload-success").index(this))>0){
+
+                            if(event.type=='mouseenter') {
+                                $(this).find('div.primary_image').addClass('over');
+                            } else {
+                                $(this).find('div.primary_image').removeClass('over');
+                            }
+                        }
+                    });
+
+                    window.removed_images = 0;
+                    $('#restricted-fine-uploader').on('click', 'a.qq-upload-delete', function(event) {
+                        window.removed_images = window.removed_images+1;
+                        $('#restricted-fine-uploader .flashmessage-error').remove();
+                    });
+
+                    $('#restricted-fine-uploader').fineUploader({
+                        request: {
+                            endpoint: 'http://localhost/osclass/index.php?page=ajax&action=ajax_upload'
+                        },
+                        multiple: true,
+                        validation: {
+                            allowedExtensions: ['png','gif','jpg','jpeg'],
+                            sizeLimit: 2097152,
+                            itemLimit: 4                        },
+                        messages: {
+                            tooManyItemsError: 'Too many items ({netItems}) would be uploaded. Item limit is {itemLimit}.',
+                            onLeave: 'The files are being uploaded, if you leave now the upload will be cancelled.',
+                            typeError: '{file} has an invalid extension. Valid extension(s): {extensions}.',
+                            sizeError: '{file} is too large, maximum file size is {sizeLimit}.',
+                            emptyError: '{file} is empty, please select files again without it.'
+                        },
+                        deleteFile: {
+                            enabled: true,
+                            method: "POST",
+                            forceConfirm: false,
+                            endpoint: 'http://localhost/osclass/index.php?page=ajax&action=delete_ajax_upload'
+                        },
+                        retry: {
+                            showAutoRetryNote : true,
+                            showButton: true
+                        },
+                        text: {
+                            uploadButton: 'Click or Drop for upload images',
+                            waitingForResponse: 'Processing...',
+                            retryButton: 'Retry',
+                            cancelButton: 'Cancel',
+                            failUpload: 'Upload failed',
+                            deleteButton: 'Delete',
+                            deletingStatusText: 'Deleting...',
+                            formatProgress: '{percent}% of {total_size}'
+                        }
+                    }).on('error', function (event, id, name, errorReason, xhrOrXdr) {
+                            $('#restricted-fine-uploader .flashmessage-error').remove();
+                            $('#restricted-fine-uploader').append('<div class="flashmessage flashmessage-error">' + errorReason + '<a class="close" onclick="javascript:$(\'.flashmessage-error\').remove();" >X</a></div>');
+                    }).on('statusChange', function(event, id, old_status, new_status) {
+                        $(".alert.alert-error").remove();
+                    }).on('complete', function(event, id, fileName, responseJSON) {
+                        if (responseJSON.success) {
+                            var new_id = id - removed_images;
+                            var li = $('.qq-upload-list li')[new_id];
+                                                        if(parseInt(new_id)==0) {
+                                $(li).append('<div class="primary_image primary"></div>');
+                            } else {
+                                $(li).append('<div class="primary_image"><a title="Make primary image"></a></div>');
+                            }
+                                                        $(li).append('<div class="ajax_preview_img"><img src="http://localhost/osclass/oc-content/uploads/temp/'+responseJSON.uploadName+'" alt="' + responseJSON.uploadName + '"></div>');
+                            $(li).append('<input type="hidden" name="ajax_photos[]" value="'+responseJSON.uploadName+'"></input>');
+                        }
+                                        });
+                                });
+
+            </script>
+                                <div class="box location">
+                            <h2>Listing Location</h2>
+                                                        <input type="hidden" id="countryId" name="countryId" value="AU"/>
+                            <div class="control-group">
+                                <label class="control-label" for="region">Region</label>
+                                <div class="controls">
+                                  <select name="regionId" id="regionId"><option value="">Select a region...</option><option value="781072">Adelaide</option><option value="781073">All Gippsland</option><option value="781074">Australian Capital Territory</option><option value="781075">Barwon-Western</option><option value="781076">Brisbane</option><option value="781077">Central Highlands-Wimmera</option><option value="781078">Central West NSW</option><option value="781079">Central West Queensland</option><option value="781080">Christmas Island</option><option value="781081">Cocos Islands</option><option value="781082">Darling Downs</option><option value="781083">Far North Queensland</option><option value="781084">Far West-North Western</option><option value="781085">Fitzroy</option><option value="781086">Gascoyne</option><option value="781087">Gippsland</option><option value="781088">Goldfields-Esperance</option><option value="781089">Goulburn-Ovens-Murray</option><option value="781090">Greater Hobart</option><option value="781091">Hunter</option><option value="781092">Illawarra</option><option value="781093">Kimberley</option><option value="781094">Loddon-Mallee</option><option value="781095">Lower West WA</option><option value="781096">Mackay</option><option value="781097">Melbourne</option><option value="781098">Mersey-Lyell</option><option value="781099">Mid West</option><option value="781100">Mid-North Coast</option><option value="781101">Mingenew</option><option value="781102">Moreton Bay</option><option value="781103">Murray-Murrumbidgee</option><option value="781104">North and West Moreton</option><option value="781105">North West Queensland</option><option value="781106">Northern and Western SA</option><option value="781107">Northern NSW</option><option value="781108">Northern Queensland</option><option value="781109">Northern Tasmania</option><option value="781110">Northern Territory</option><option value="781111">Perth</option><option value="781112">Pilbara</option><option value="781113">Richmond-Tweed</option><option value="781114">South and East Moreton</option><option value="781115">South Coast</option><option value="781116">South East Queensland</option><option value="781117">South Eastern NSW</option><option value="781118">South West Queensland</option><option value="781119">Southern and Eastern SA</option><option value="781120">Sunshine Coast</option><option value="781121">Sydney</option><option value="781122">Wheatbelt</option><option value="781123">Wide Bay-Burnett</option></select>                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label class="control-label" for="city">City</label>
+                                <div class="controls">
+                                    <select name="cityId" id="cityId"><option value="">Select a city...</option><option value="65611">Adelaide</option><option value="65592">Adelaide Hills</option><option value="65593">Burnside</option><option value="65594">Campbelltown</option><option value="65595">Charles Sturt</option><option value="65610">Crafers</option><option value="65605">Gawler</option><option value="65596">Holdfast Bay</option><option value="65608">Marion</option><option value="65606">Mitcham</option><option value="65598">Onkaparinga</option><option value="65599">Playford</option><option value="65600">Port Adel. Enfield</option><option value="65609">Prospect</option><option value="65601">Salisbury</option><option value="65602">Tea Tree Gully</option><option value="65607">Unley</option><option value="65603">Walkerville</option><option value="65604">West Torrens</option></select>                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="cityArea">City Area</label>
+                                <div class="controls">
+                                    <input id="cityArea" type="text" name="cityArea" value="" /><input id="cityAreaId" type="hidden" name="cityAreaId" value="" />                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="address">Address</label>
+                                <div class="controls">
+                                  <input id="address" type="text" name="address" value="" />                                </div>
+                            </div>
+                        </div>
+                        <!-- seller info -->
+                                                <div class="box seller_info">
+                            <h2>Seller's information</h2>
+                            <div class="control-group">
+                                <label class="control-label" for="contactName">Name</label>
+                                <div class="controls">
+                                    <input id="contactName" type="text" name="contactName" value="" />                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label" for="contactEmail">E-mail</label>
+                                <div class="controls">
+                                    <input id="contactEmail" type="text" name="contactEmail" value="" />                                </div>
+                            </div>
+                            <div class="control-group">
+                                <div class="controls checkbox">
+                                    <input id="showEmail" type="checkbox" name="showEmail" value="1" /> <label for="showEmail">Show e-mail on the listing page</label>
+                                </div>
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+	var catPriceEnabled = new Array();
+	catPriceEnabled[4] = 1;catPriceEnabled[47] = 1;catPriceEnabled[51] = 1;    $("#catId").change(function(){
+        var cat_id = $(this).val();
+                var url = 'http://localhost/osclass/index.php';
+                var result = '';
+
+        if(cat_id != '') {
+			if(catPriceEnabled[cat_id] == 1) {
+				$("#price").closest("div").show();
+                                // trigger show-price event
+                                $('#price').trigger('show-price');
+			} else {
+				$("#price").closest("div").hide();
+				$('#price').val('') ;
+                                // trigger hide-price event
+                                $('#price').trigger('hide-price');
+			}
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: 'page=ajax&action=runhook&hook=item_form&catId=' + cat_id,
+                dataType: 'html',
+                success: function(data){
+                    $("#plugin-hook").html(data);
+                }
+            });
+        }
+    });
+    $(document).ready(function(){
+        var cat_id = $("#catId").val();
+                var url = 'http://localhost/osclass/index.php';
+                var result = '';
+
+        if(cat_id != '') {
+			if(catPriceEnabled[cat_id] == 1) {
+				$("#price").closest("div").show();
+			} else {
+				$("#price").closest("div").hide();
+				$('#price').val('') ;
+			}
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: 'page=ajax&action=runhook&hook=item_form&catId=' + cat_id,
+                dataType: 'html',
+                success: function(data){
+                    $("#plugin-hook").html(data);
+                }
+            });
+        }
+    });
+</script>
+<div id="plugin-hook">
+</div>
+                        <div class="control-group">
+                                                        <div class="controls">
+                                <button type="submit" class="ui-button ui-button-middle ui-button-main">Publish</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $('#price').bind('hide-price', function(){
+                $('.control-group-price').hide();
+            });
+
+            $('#price').bind('show-price', function(){
+                $('.control-group-price').show();
+            });
+
+        $().ready(function(){
+        $("#price").blur(function(event) {
+            var price = $("#price").prop("value");
+                                    var tmp = price.split('.');
+            if(tmp.length>2) {
+                price = tmp[0]+'.'+tmp[1];
+            }
+                        $("#price").prop("value", price);
+        });
+    });
+    </script>
+</div><!-- content -->
+</div>
+<div id="responsive-trigger"></div>
+<!-- footer -->
+<div class="clear"></div>
+<div id="footer">
+    <div class="wrapper">
+        <ul class="resp-toggle">
+                                        <li><a href="http://localhost/osclass/index.php?page=login">Login</a></li>
+                                    <li>
+                        <a href="http://localhost/osclass/index.php?page=register&action=register">Register for a free account</a>
+                    </li>
+                                                                <li class="publish">
+                <a href="http://localhost/osclass/index.php?page=item&action=item_add&catId=4">Publish your ad for free</a>
+            </li>
+                    </ul>
+        <ul>
+                    <li>
+                <a href="http://localhost/osclass/index.php?page=contact">Contact</a>
+            </li>
+        </ul>
+                   </div>
+</div>
+</body></html>

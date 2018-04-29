@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="robots" content="noindex, nofollow, noarchive"/>
+        <meta name="googlebot" content="noindex, nofollow, noarchive"/>
+        <title>Rentarro &raquo; Log in</title>
+        <script type="text/javascript" src="http://localhost/osclass/oc-includes/osclass/assets/js/jquery.min.js"></script>
+        <link type="text/css" href="style/backoffice_login.css" media="screen" rel="stylesheet"/>
+            </head>
+    <body class="login">
+        <div id="login">
+            <h1>
+                <a href="http://osclass.org/" title="Osclass">
+                    <img src="http://localhost/osclass/oc-admin/images/osclass-logo.gif" border="0" title="Osclass" alt="Osclass"/>
+                </a>
+            </h1>
+                        <form name="loginform" id="loginform" action="http://localhost/osclass/oc-admin/index.php" method="post"><input type='hidden' name='CSRFName' value='CSRF1514262285_402869185' />
+        <input type='hidden' name='CSRFToken' value='9b65885db955505ad77d05b6bcd5443b23e26489333172aa5b5fc9653e29aaf6e24d30d051d134d289b90cb4af9f6e027e9bd37017865fa73621c5242ec14a9b' />
+                <input type="hidden" name="page" value="login"/>
+                <input type="hidden" name="action" value="login_post"/>
+                <p>
+                    <label for="user_login">
+                        <span>Username</span>
+                        <input type="text" name="user" id="user_login" class="input" value="" size="20"/>
+                    </label>
+                </p>
+                <p>
+                    <label for="user_pass">
+                        <span>Password</span>
+                        <input type="password" name="password" id="user_pass" class="input" value="" size="20" autocomplete="off"/>
+                    </label>
+                </p>
+                                                                    <input type="hidden" name="locale" value="en_US"/>
+                                <p class="forgetmenot">
+                    <label>
+                        <input name="remember" type="checkbox" id="remember" value="1"/> Remember me                    </label>
+                        <a href="http://localhost/osclass/oc-admin/index.php?page=login&amp;action=recover" title="Forgot your password?" class="forgot">Forgot your password?</a>
+                </p>
+                <p class="submit">
+                    <input type="submit" name="submit" id="submit" value="Log in"/>
+                </p>
+            </form>
+
+        </div>
+        <p id="backtoblog"><a href="http://localhost/osclass/" title="Back to Rentarro">&larr; Back to Rentarro</a></p>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                function placeholder(input_form) {
+                    input_form.each(function() {
+                        $(this).focus(function() {
+                            $(this).prev().hide();
+                        }).blur(function() {
+                            if($(this).val() == '') {
+                                $(this).prev().show();
+                            }
+                        }).prev().click(function() {
+                            $(this).hide().next().focus();
+                        });
+                        if($(this).val() != '') {
+                            $(this).prev().hide();
+                        }
+                    });
+                }
+
+                placeholder($('#user_login, #user_pass'));
+                setTimeout(function() {
+                    placeholder($('#user_login, #user_pass'));
+                }, '500');
+
+                $(".ico-close").click(function(){
+                    $(this).parent().hide();
+                });
+
+                $("#user_login").focus();
+            });
+        </script>
+    </body>
+</html>
