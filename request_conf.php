@@ -7,7 +7,7 @@ session_start();
 
 // If session variable is not set it will redirect to login page
 if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
-  header("location: /car_list_main.php");
+  header("location: car_list_main.php");
   exit;
 }else{
 	$car_id = $_SESSION['this_car_id'];
@@ -23,7 +23,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $image, $model, $manufacturer, $transmission, $odometer, $users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $image, $model, $manufacturer, $transmission, $odometer, $car_owner_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -40,9 +40,40 @@ mysqli_stmt_close($getCarSqlStmt);
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
+	//to put through an actual request
+	if(isset($_POST["reqConf"])){
+		
+		// Set parameters
+		$status = "requested";
+		$param_startdate = trim($_POST['startdate']);
+		$param_enddate = trim($_POST['enddate']);
+		
+		if(empty($param_startdate || $param_startdate)){
+			echo "Please choose dates for your booking.";
+			
+		}else{
+
+			// Prepare an insert statement
+			$sql = "INSERT INTO reservation (status, startdate, enddate, renter, rentee, car_id) VALUES (?, ?, ?, ?, ?, ?)";
+			
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "sssiii", $status, $param_startdate, $param_enddate, $car_owner_users_id, $_SESSION['users_id'], $car_id);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					mysqli_stmt_store_result($stmt);
+					header("location: /welcome.php");
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($stmt);
+		}
+	}
 }	
-
-
 
 // Close connection
 mysqli_close($link);
@@ -50,7 +81,7 @@ mysqli_close($link);
  
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>
     <meta charset="UTF-8">
     <title>Welcome</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
@@ -64,7 +95,12 @@ mysqli_close($link);
 	</div>
 	
 	<p><?php echo $textArea; ?></p>
-	<p><a href="/request_conf.php" class="btn btn-primary">Request A Booking</a></p>
+	
+	<form action= "<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+		Start date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="startdate"> <br>
+		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate"> <br>
+		<input type="submit" name="reqConf" class="btn btn-primary" value="Confirm Request">
+	</form>
 	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>

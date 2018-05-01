@@ -46,7 +46,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	if(isset($_POST["requestBooking"])){
 		$this_car_id = trim($_POST["this_car_id"]);
 		$_SESSION['this_car_id'] = $this_car_id;   
-		header("location: /request.php");
+		header("location: /request_conf.php");
 	}
 }	
 
