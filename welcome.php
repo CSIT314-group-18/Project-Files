@@ -35,7 +35,7 @@ if($verified == 1){
 }
 
 //initialize variable
-$users_id = "";
+$users_id = 0;
 //get the id of this user, so that we can use it when finding all the cars they have
 $getUserSql = "SELECT users_id FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
 if($getUserSqlStmt = mysqli_prepare($link, $getUserSql)){
@@ -91,6 +91,14 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 // Close statement
 mysqli_stmt_close($getCarSqlStmt);
 
+//it's easier to define here the button that let's your delete your account
+$deleteAccountArea = '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . "'" . htmlspecialchars($_SESSION['username']) . "'" . ')">Remove Your Account From Our Site</button>
+			<div id="deleter' . htmlspecialchars($_SESSION['username']) . '" style="display:none">
+			<p>Are you really sure you want to delete your account?</p>
+			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="submit" name="delAcc" class="btn btn-danger" value="Delete">
+			</form>
+			</div>';
 
 // Define variables and initialize with empty values
 $email = $email_err = "";
@@ -186,6 +194,28 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 		}
 	}
+	
+	//for when they want to legit delete their account
+	if(isset($_POST["delAcc"])){
+		
+		// Prepare a delete statement
+		$DASql = "DELETE FROM users WHERE users_id = ?";
+		
+		if($DASqlStmt = mysqli_prepare($link, $DASql)){
+			
+			// Bind variables to the prepared statement as parameters
+			mysqli_stmt_bind_param($DASqlStmt, "i", $users_id);
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($DASqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($DASqlStmt);
+				header("location: register.php");
+			} else{
+				echo "Oops! Something went wrong with deleting your account.";
+			}
+		}
+	}
 }	
 // Close connection
 mysqli_close($link);
@@ -230,7 +260,17 @@ mysqli_close($link);
 	</div>
 	<p><a href="add_car.php" class="btn btn-primary">Add a car available for rent</a></p>
 	
-	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
+	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+	<p><a href="/logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
+	</div>
+	
+	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+		<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
+	</div>
+	
+	<div style="position: absolute; right: 10px; bottom: 10px; border: 3px;">
+		<?php echo $deleteAccountArea; ?>
+	</div>
 	
 </body>
 </html>
