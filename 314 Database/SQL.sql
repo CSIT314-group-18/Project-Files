@@ -4,6 +4,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     verifed INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	facebook VARCHAR(255),
     location_id INT,
 	PRIMARY KEY (users_id)
 );
@@ -21,9 +22,18 @@ CREATE TABLE car (
     manufacturer VARCHAR(50) NOT NULL,
     transmission VARCHAR(50) NOT NULL,
     odometer INT NOT NULL,
+	status VARCHAR(50) NOT NULL,
     users_id INT,
 	PRIMARY KEY (car_id)
 );
+
+CREATE TABLE car_rating (
+	rating_id INT NOT NULL AUTO_INCREMENT,
+	review VARCHAR(50) NOT NULL,
+	rating INT NOT NULL,
+	car_id INT NOT NULL,
+	PRIMARY KEY (rating_id)
+); 
 
 CREATE TABLE location (
     location_id INT NOT NULL AUTO_INCREMENT,
@@ -41,10 +51,10 @@ CREATE TABLE reservation (
     status VARCHAR(50) NOT NULL,
     startdate DATETIME NOT NULL,
     enddate DATETIME NOT NULL,
-    cost DOUBLE NOT NULL,
+    bond DOUBLE NOT NULL,
     fee DOUBLE NOT NULL,
-	renter INT,
-    rentee INT,
+	owner INT,
+    renter INT,
     car_id INT,
 	PRIMARY KEY (reservation_id)
 );
