@@ -52,7 +52,38 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			echo "Please choose dates for your booking.";
 			
 		}else{
+			
+			
+			//check if this car belongs to them
+			$car_check_id = 0;
+			$carCheckSql = "SELECT car_id FROM car WHERE users_id = '" . $_SESSION['users_id'] . "'";
+			if($carCheckSqlStmt = mysqli_prepare($link, $carCheckSql)){
 
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($carCheckSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($carCheckSqlStmt);
+					mysqli_stmt_bind_result($carCheckSqlStmt, $car_check_id);
+
+					//check if the owners cars match the id of this one
+					while(mysqli_stmt_fetch($carCheckSqlStmt)){
+						if($car_id == $car_check_id){
+							echo '<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+							<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
+							</div>';
+							exit("You already own this car, so you don't need to rent it out.");
+						}
+						
+					}
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($carCheckSqlStmt);
+
+			
+			
+			
 			// Prepare an insert statement
 			$sql = "INSERT INTO reservation (status, startdate, enddate, renter, rentee, car_id) VALUES (?, ?, ?, ?, ?, ?)";
 			

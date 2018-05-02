@@ -133,7 +133,7 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
 			
-			$incomingReserv .= $rentee_name . " wants to rent your " . $car_name . " from " . $startdate . " until " . $enddate;
+			$incomingReserv .= $rentee_name . " wants to rent your " . $car_name . " from <br>" . $startdate . " until " . $enddate;
 			$incomingReserv .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="acceptRes" class="btn" value="Accept"></form>
@@ -145,6 +145,73 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 }
 // Close statement
 mysqli_stmt_close($getReservSqlStmt);
+
+
+
+//Get any payments this user is required to do
+$status = $startdate = $enddate = $incomingPay = "";
+$reservation_id = $renter = $rentee = $rented_car_id = 0;
+$getPaySql = "SELECT reservation_id, status, startdate, enddate, renter, rentee, car_id FROM reservation WHERE status = 'accepted' AND rentee = " . $users_id;
+if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($getPaySqlStmt)){
+		
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($getPaySqlStmt);
+		mysqli_stmt_bind_result($getPaySqlStmt, $reservation_id, $status, $startdate, $enddate, $renter, $rentee, $rented_car_id);
+
+		//populate the html text field variable
+		while(mysqli_stmt_fetch($getPaySqlStmt)){
+			
+			//get the name of the rentee
+			$renter_name = "";
+			$getRenterSql = "SELECT username FROM users WHERE users_id = " . "'" . $renter . "'";
+			if($getRenterSqlStmt = mysqli_prepare($link, $getRenterSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getRenterSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getRenterSqlStmt);
+					mysqli_stmt_bind_result($getRenterSqlStmt, $renter_name);
+					mysqli_stmt_fetch($getRenterSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getRenterSqlStmt);
+			
+			//get the name of the rentee
+			$car_name = "";
+			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $renter . "'";
+			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getCarNameSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getCarNameSqlStmt);
+					mysqli_stmt_bind_result($getCarNameSqlStmt, $car_name);
+					mysqli_stmt_fetch($getCarNameSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getCarNameSqlStmt);
+			
+			
+			$incomingPay .= $renter_name . " accepted your request to rent their " . $car_name . " from <br>" . $startdate . " until " . $enddate;
+			$incomingPay .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
+			<input type="submit" name="pay" class="btn" value="Pay Now"></form>
+			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
+			<input type="submit" name="cancel" class="btn" value="Cancel Reservation"></form>';
+		}
+	}
+}
+// Close statement
+mysqli_stmt_close($getPaySqlStmt);
+
 
 
 // Define variables and initialize with empty values
@@ -312,6 +379,48 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($declineReqSql);
 	}
+	
+	//for when user presses the pay button
+	if(isset($_POST["pay"])){
+		$reservation_id = trim($_POST["reservation_id"]);
+		// Prepare an update statement
+		$payReqSql = "UPDATE reservation SET status = 'paid' WHERE reservation_id = " . $reservation_id;
+		
+		if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($payReqSqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($payReqSqlStmt);
+				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($payReqSql);
+	}
+	
+	//for when user presses the cancel payment button
+	if(isset($_POST["cancel"])){
+		$reservation_id = trim($_POST["reservation_id"]);
+		// Prepare an update statement
+		$cancelReqSql = "UPDATE reservation SET status = 'declined' WHERE reservation_id = " . $reservation_id;
+		
+		if($cancelReqSqlStmt = mysqli_prepare($link, $cancelReqSql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($cancelReqSqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($cancelReqSqlStmt);
+				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($cancelReqSql);
+	}
 }	
 // Close connection
 mysqli_close($link);
@@ -358,11 +467,15 @@ mysqli_close($link);
 			</form>
 		</div>
 		
-		<p><a href="add_car.php" class="btn btn-primary">Add a car available for rent</a></p>
+		<p><a href="add_car.php" class="btn">Add a car available for rent</a></p>
 	</div>
 	
 	<div style = "position: absolute; right: 10px;">
 	<p><?php echo $incomingReserv; ?></p>
+	</div>
+	
+	<div align = "center">
+	<p><?php echo $incomingPay; ?></p>
 	</div>
 	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
