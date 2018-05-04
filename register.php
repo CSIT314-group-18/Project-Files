@@ -4,17 +4,72 @@ require_once 'config.php';
  
 // Define variables and initialize with empty values
 $username = $password = $confirm_password = "";
-$username_err = $password_err = $confirm_password_err = "";
+$username_err = $password_err = $confirm_password_err = $address_err = "";
+$location_id = 0;
  
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
- 
+	
+	//user must have the location set
+	$street = trim($_POST["street"]);
+	$suburb = trim($_POST["suburb"]);
+	$postcode = trim($_POST["postcode"]);
+	$city = trim($_POST["city"]);
+	$country = trim($_POST["country"]);
+	if(empty($street) || empty($suburb) || empty($postcode) || empty($city) || empty($country)){
+		$address_err = "Please fill out all parts of the address form.";
+		echo "Please fill out all parts of the address form.";
+	}else{
+		if(!is_int((int)$postcode)){
+			$address_err = "The postcode must be a number.";
+			echo "The postcode must be a number.";
+		}else{
+				$sql = "INSERT INTO location (street, suburb, postcode, city, country) VALUES  (?, ?, ?, ?, ?)";
+
+				if($stmt = mysqli_prepare($link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "sssss", $street, $suburb, $postcode, $city, $country);
+
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						mysqli_stmt_store_result($stmt);
+						mysqli_stmt_bind_result($stmt, $location_id);
+						mysqli_stmt_fetch($stmt);
+						
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+				
+				//get that location id we just put in
+				$sql = "SELECT MAX(location_id) FROM location";
+				if($stmt = mysqli_prepare($link, $sql)){
+
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						mysqli_stmt_store_result($stmt, $location_id);
+						mysqli_stmt_bind_result($stmt, $location_id);
+						mysqli_stmt_fetch($stmt);
+						
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+		}
+	}
+	
     // Validate username
     if(empty(trim($_POST["username"]))){
         $username_err = "Please enter a username.";
     } else{
         // Prepare a select statement
-        $sql = "SELECT users_id FROM user WHERE username = ?";
+        $sql = "SELECT users_id FROM users WHERE username = ?";
         
         if($stmt = mysqli_prepare($link, $sql)){
             // Bind variables to the prepared statement as parameters
@@ -62,14 +117,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
     
     // Check input errors before inserting in database
-    if(empty($username_err) && empty($password_err) && empty($confirm_password_err)){
+    if(empty($username_err) && empty($password_err) && empty($confirm_password_err) && empty($address_err)){
         
         // Prepare an insert statement
-        $sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+        $sql = "INSERT INTO users (username, password, location_id) VALUES (?, ?, ?)";
          
         if($stmt = mysqli_prepare($link, $sql)){
             // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "ss", $param_username, $param_password);
+            mysqli_stmt_bind_param($stmt, "ssi", $param_username, $param_password, $location_id);
             
             // Set parameters
             $param_username = $username;
@@ -124,12 +179,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <input type="password" name="confirm_password" class="form-control" value="<?php echo $confirm_password; ?>">
                 <span class="help-block"><?php echo $confirm_password_err; ?></span>
             </div>
+			
+			<div class="form-group">
+			Street<input type="text" name="street" class="form-control">
+			Suburb<input type="text" name="suburb" class="form-control">
+			Postcode<input type="text" name="postcode" class="form-control">
+			City<input type="text" name="city" class="form-control">
+			Country<input type="text" name="country" class="form-control">
+			</div>
+			
             <div class="form-group">
                 <input type="submit" class="btn btn-primary" value="Submit">
                 <input type="reset" class="btn btn-default" value="Reset">
             </div>
             <p>Already have an account? <a href="login.php">Login here</a>.</p>
         </form>
+		
     </div>    
 </body>
 </html>

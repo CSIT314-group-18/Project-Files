@@ -12,9 +12,9 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 }
 
 //get the verified variable and the user id from this user, to see if they need to be
-$verified = $users_id = 0;
+$verified = $users_id = $location_id = 0;
 $divArea = "";
-$getVerSql = "SELECT users_id, verifed FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
+$getVerSql = "SELECT users_id, verifed, location_id FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
 if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 	
 	// Attempt to execute the prepared statement
@@ -22,13 +22,14 @@ if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getVerSqlStmt);
-		mysqli_stmt_bind_result($getVerSqlStmt, $users_id, $verified);
+		mysqli_stmt_bind_result($getVerSqlStmt, $users_id, $verified, $location_id);
 		mysqli_stmt_fetch($getVerSqlStmt);
 	}
 }
 // Close statement
 mysqli_stmt_close($getVerSqlStmt);
 
+$_SESSION['location_id'] = $location_id;
 $_SESSION['users_id'] = $users_id;
 
 //make the verify form hidden if the user is already verified
@@ -74,6 +75,82 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 // Close statement
 mysqli_stmt_close($getCarSqlStmt);
 
+
+
+//get the parts of the users account, ready to change
+$userAccountArea = $username = $facebook = $street = $suburb = $postcode = $city = $country = "";
+$location_id = 0;
+$getuserInfoSql = "SELECT facebook, location_id FROM users WHERE users_id = " . $users_id;
+if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($getuserInfoSqlStmt)){
+		
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($getuserInfoSqlStmt);
+		mysqli_stmt_bind_result($getuserInfoSqlStmt, $facebook, $location_id);
+		if(mysqli_stmt_num_rows($getuserInfoSqlStmt) != 1){
+                    $userAccountArea = "Error, your info wasn't retrievable.";
+		}
+		//populate the html text field variable
+		while(mysqli_stmt_fetch($getuserInfoSqlStmt)){
+			
+			if($location_id != 0){
+				//Get the location variables based on the id
+				$getLocSql = "SELECT street, suburb, postcode, city, country FROM location WHERE location_id = " . $location_id;
+				if($getLocSqlStmt = mysqli_prepare($link, $getLocSql)){
+		
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getLocSqlStmt)){
+				
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getLocSqlStmt);
+						mysqli_stmt_bind_result($getLocSqlStmt, $street, $suburb, $postcode, $city, $country);
+						mysqli_stmt_fetch($getLocSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getLocSqlStmt);
+			}
+			
+			$userAccountArea .= "<ul style='list-style-type:none'><li>" . htmlspecialchars($_SESSION["username"]) . 
+			'&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'unameChange'," . $users_id . ')">Change Username</button>
+			<div id="unameChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="text" name="newUname" class="form-control">
+			<input type="submit" name="unameChange" class="btn btn-primary" value="Submit Username Change"></form><br><br></div></li>
+			<li><button class="btn" onclick="showChanger(' . "'pwordChange'," . $users_id . ')">Change Password</button>
+			<div id="pwordChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			Your password now
+			<input type="password" name="oldPword" class="form-control"><br><br>
+			New Password
+			<input type="password" name="newPword1" class="form-control">
+			Retype new password
+			<input type="password" name="newPword2" class="form-control">
+			<input type="submit" name="pwordChange" class="btn btn-primary" value="Submit Password Change"></form><br><br></div></li>
+			<li>' . $facebook . '&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'fbChange'," . $users_id . ')">Change Facebook Link</button>
+			<div id="fbChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="text" name="newFb" class="form-control">
+			<input type="submit" name="fbChange" class="btn btn-primary" value="Change Facebook Link"></form><br><br></div></li>
+			<li><h3>Your Location</h3><br>' . $street . '<br>' . $suburb . '<br>' . $postcode . '<br>' . $city . '<br>' . $country . '<br>' . '
+			<button class="btn" onclick="showChanger(' . "'addressChange'," . $users_id . ')">Change Address</button>
+			<div id="addressChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			Street<input type="text" name="street" class="form-control" value="' . $street . '">
+			Suburb<input type="text" name="suburb" class="form-control" value="' . $suburb . '">
+			Postcode<input type="text" name="postcode" class="form-control" value="' . $postcode . '">
+			City<input type="text" name="city" class="form-control" value="' . $city . '">
+			Country<input type="text" name="country" class="form-control" value="' . $country . '">
+			<input type="submit" name="addressChange" class="btn btn-primary" value="Change Address"></form><br><br></div></li>
+			</ul>';
+			
+			
+		}
+	}
+}
+// Close statement
+mysqli_stmt_close($getuserInfoSqlStmt);
+
+
+
 //it's easier to define here the button that let's your delete your account
 $deleteAccountArea = '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . "'" . htmlspecialchars($_SESSION['username']) . "'" . ')">Remove Your Account From Our Site</button>
 <div id="deleter' . htmlspecialchars($_SESSION['username']) . '" style="display:none">
@@ -84,8 +161,8 @@ $deleteAccountArea = '<button class="btn btn-danger" onclick="showChanger(' . "'
 
 //Get any incoming requests for the users cars
 $status = $startdate = $enddate = $incomingReserv = "";
-$reservation_id = $renter = $rentee = $rented_car_id = 0;
-$getReservSql = "SELECT reservation_id, status, startdate, enddate, renter, rentee, car_id FROM reservation WHERE status = 'requested' AND renter = " . $users_id;
+$reservation_id = $owner = $renter = $rented_car_id = 0;
+$getReservSql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'requested' AND renter = " . $users_id;
 if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 	
 	// Attempt to execute the prepared statement
@@ -93,14 +170,14 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getReservSqlStmt);
-		mysqli_stmt_bind_result($getReservSqlStmt, $reservation_id, $status, $startdate, $enddate, $renter, $rentee, $rented_car_id);
+		mysqli_stmt_bind_result($getReservSqlStmt, $reservation_id, $status, $startdate, $enddate, $owner, $renter, $rented_car_id);
 
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getReservSqlStmt)){
 			
-			//get the name of the rentee
-			$rentee_name = "";
-			$getRenteeSql = "SELECT username FROM users WHERE users_id = " . "'" . $rentee . "'";
+			//get the name of the renter
+			$renter_name = "";
+			$getRenteeSql = "SELECT username FROM users WHERE users_id = " . "'" . $owner . "'";
 			if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
 			
 				// Attempt to execute the prepared statement
@@ -108,14 +185,14 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 
 					// Store result, print it to the variable
 					mysqli_stmt_store_result($getRenteeSqlStmt);
-					mysqli_stmt_bind_result($getRenteeSqlStmt, $rentee_name);
+					mysqli_stmt_bind_result($getRenteeSqlStmt, $renter_name);
 					mysqli_stmt_fetch($getRenteeSqlStmt);
 				}
 			}
 			// Close statement
 			mysqli_stmt_close($getRenteeSqlStmt);
 			
-			//get the name of the rentee
+			//get the name of the renter
 			$car_name = "";
 			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $users_id . "'";
 			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
@@ -133,7 +210,7 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
 			
-			$incomingReserv .= $rentee_name . " wants to rent your " . $car_name . " from <br>" . $startdate . " until " . $enddate;
+			$incomingReserv .= $renter_name . " wants to rent your " . $car_name . " from <br>" . $startdate . " until " . $enddate;
 			$incomingReserv .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="acceptRes" class="btn" value="Accept"></form>
@@ -150,8 +227,8 @@ mysqli_stmt_close($getReservSqlStmt);
 
 //Get any payments this user is required to do
 $status = $startdate = $enddate = $incomingPay = "";
-$reservation_id = $renter = $rentee = $rented_car_id = 0;
-$getPaySql = "SELECT reservation_id, status, startdate, enddate, renter, rentee, car_id FROM reservation WHERE status = 'accepted' AND rentee = " . $users_id;
+$reservation_id = $owner = $renter = $rented_car_id = 0;
+$getPaySql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'accepted' AND renter = " . $users_id;
 if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 	
 	// Attempt to execute the prepared statement
@@ -159,14 +236,14 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getPaySqlStmt);
-		mysqli_stmt_bind_result($getPaySqlStmt, $reservation_id, $status, $startdate, $enddate, $renter, $rentee, $rented_car_id);
+		mysqli_stmt_bind_result($getPaySqlStmt, $reservation_id, $status, $startdate, $enddate, $owner, $renter, $rented_car_id);
 
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getPaySqlStmt)){
 			
-			//get the name of the rentee
-			$renter_name = "";
-			$getRenterSql = "SELECT username FROM users WHERE users_id = " . "'" . $renter . "'";
+			//get the name of the renter
+			$owner_name = "";
+			$getRenterSql = "SELECT username FROM users WHERE users_id = " . "'" . $owner . "'";
 			if($getRenterSqlStmt = mysqli_prepare($link, $getRenterSql)){
 			
 				// Attempt to execute the prepared statement
@@ -174,16 +251,16 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 
 					// Store result, print it to the variable
 					mysqli_stmt_store_result($getRenterSqlStmt);
-					mysqli_stmt_bind_result($getRenterSqlStmt, $renter_name);
+					mysqli_stmt_bind_result($getRenterSqlStmt, $owner_name);
 					mysqli_stmt_fetch($getRenterSqlStmt);
 				}
 			}
 			// Close statement
 			mysqli_stmt_close($getRenterSqlStmt);
 			
-			//get the name of the rentee
+			//get the name of the renter
 			$car_name = "";
-			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $renter . "'";
+			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $owner . "'";
 			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
 			
 				// Attempt to execute the prepared statement
@@ -199,7 +276,7 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
 			
-			$incomingPay .= $renter_name . " accepted your request to rent their " . $car_name . " from <br>" . $startdate . " until " . $enddate;
+			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . $startdate . " until " . $enddate;
 			$incomingPay .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="pay" class="btn" value="Pay Now"></form>
@@ -421,6 +498,219 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($cancelReqSql);
 	}
+	
+	//if the user submitted a change of username
+	if(isset($_POST["unameChange"])){
+		
+		// Validate username
+		if(empty(trim($_POST["newUname"]))){
+			echo "Please enter a username.";
+		} else{
+			$newUname = trim($_POST["newUname"]);
+			
+			// Prepare a select statement
+			$sql = "SELECT users_id FROM users WHERE username = ?";
+			
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "s", $newUname);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					mysqli_stmt_store_result($stmt);
+					
+					if(mysqli_stmt_num_rows($stmt) == 1){
+						echo "This username is already taken.";
+					} else{
+						
+						// Prepare an update statement
+						$Usql = "UPDATE users SET username = ? WHERE username = '" . htmlspecialchars($_SESSION['username']) . "'";
+
+						if($Ustmt = mysqli_prepare($link, $Usql)){
+							// Bind variables to the prepared statement as parameters
+							mysqli_stmt_bind_param($Ustmt, "s", $newUname);
+
+							// Attempt to execute the prepared statement
+							if(mysqli_stmt_execute($Ustmt)){
+								/* store result */
+								mysqli_stmt_store_result($Ustmt);
+								$_SESSION['username'] = $newUname;
+								header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+							}
+						}
+						mysqli_stmt_close($Ustmt);
+					}
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			 
+			// Close statement
+			mysqli_stmt_close($stmt);
+		}
+	}
+	
+	//if the user submitted a change of password 
+	if(isset($_POST["pwordChange"])){
+		
+		
+		// Validate password
+		if(empty(trim($_POST["oldPword"])) || empty(trim($_POST["newPword1"])) || empty(trim($_POST["newPword1"]))){
+			echo "Please enter all passwords.";
+		} else{
+			$newPword1 = trim($_POST["newPword1"]);
+			$newPword2 = trim($_POST["newPword2"]);
+			$oldPword = trim($_POST["oldPword"]);
+			
+			//check if they're the same
+			if(($newPword1 == $newPword2) && ($oldPword != $newPword1)){
+				
+				$comparedPword = $newPword = "";
+				$newPword = password_hash($newPword1, PASSWORD_DEFAULT);
+				
+				// Prepare a select statement
+				$Psql = "SELECT password FROM users WHERE username = '" . htmlspecialchars($_SESSION['username']) . "'";
+				
+					if($Pstmt = mysqli_prepare($link, $Psql)){
+						// Bind variables to the prepared statement as parameters
+						
+						// Attempt to execute the prepared statement
+						if(mysqli_stmt_execute($Pstmt)){
+							/* store result */
+							mysqli_stmt_store_result($Pstmt);
+							mysqli_stmt_bind_result($Pstmt, $comparedPword);
+							mysqli_stmt_fetch($Pstmt);
+						} else{
+							echo "Oops! Something went wrong. Please try again later.";
+						}
+					}
+				// Close statement
+				mysqli_stmt_close($Pstmt);
+				
+				
+				if(password_verify($oldPword, $comparedPword)) { 
+					// Prepare an update statement
+					$sql = "UPDATE users SET password = ? WHERE password = '" . $comparedPword . "'";
+
+					if($stmt = mysqli_prepare($link, $sql)){
+						// Bind variables to the prepared statement as parameters
+						mysqli_stmt_bind_param($stmt, "s", $newPword);
+						
+						// Attempt to execute the prepared statement
+						if(mysqli_stmt_execute($stmt)){
+							/* store result */
+							mysqli_stmt_store_result($stmt);
+							echo "Password changed successfully.";
+						} else{
+							echo "Oops! Something went wrong. Please try again later.";
+						}
+					}
+					
+					// Close statement
+					mysqli_stmt_close($stmt);
+				} else { 
+					echo "The current password you entered was wrong.";
+				} 
+			}else {
+				echo "Please re-enter the same password.";
+			}
+		}
+		
+	}
+	
+	//if the user submitted a change of facebook link
+	if(isset($_POST["fbChange"])){
+		if(empty(trim($_POST["newFb"]))){
+			echo "Please enter a URL.";
+		} else {
+			//check if it's a site
+			$regex = '@^(http\:\/\/|https\:\/\/)?(facebook*\.)+(com*\/)+[a-z0-9][a-z0-9\-]*$@i';
+			$newFb = trim($_POST["newFb"]);
+			if(preg_match($regex, $newFb)){
+				
+				$sql = "UPDATE users SET facebook = ? WHERE username = '" . htmlspecialchars($_SESSION['username']) . "'";
+
+				if($stmt = mysqli_prepare($link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "s", $newFb);
+					
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						mysqli_stmt_store_result($stmt);
+						echo "Facebook link changed successfully.";
+						header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+			}else {
+				echo "Invalid link!";
+			}
+			
+		}
+	}
+	
+	//if the user submitted a change of address
+	if(isset($_POST["addressChange"])){
+		$street = trim($_POST["street"]);
+		$suburb = trim($_POST["suburb"]);
+		$postcode = trim($_POST["postcode"]);
+		$city = trim($_POST["city"]);
+		$country = trim($_POST["country"]);
+		if(empty($street) || empty($suburb) || empty($postcode) || empty($city) || empty($country)){
+			echo "Please fill out all parts of the form.";
+		}else{
+			if(!is_int((int)$postcode)){
+				echo "The postcode must be a number.";
+			}else{
+				$location_id = 0;
+				
+				//get the location_id of this user, so that we can update the location table at the right place
+				$getVerSql = "SELECT location_id FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
+				if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
+
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getVerSqlStmt)){
+
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getVerSqlStmt);
+						mysqli_stmt_bind_result($getVerSqlStmt, $location_id);
+						mysqli_stmt_fetch($getVerSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getVerSqlStmt);
+				
+				if($location_id != 0){
+					
+					$sql = "UPDATE location SET street = ?, suburb = ?, postcode = ?, city = ?, country = ?, users_id = ? WHERE location_id = " . $location_id;
+					
+					if($stmt = mysqli_prepare($link, $sql)){
+						// Bind variables to the prepared statement as parameters
+						mysqli_stmt_bind_param($stmt, "sssssi", $street, $suburb, $postcode, $city, $country, $users_id);
+
+						// Attempt to execute the prepared statement
+						if(mysqli_stmt_execute($stmt)){
+							/* store result */
+							mysqli_stmt_store_result($stmt);
+							echo "Address changed successfully.";
+							header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+						} else{
+							echo "Oops! Something went wrong. Please try again later.";
+						}
+					}
+					// Close statement
+					mysqli_stmt_close($stmt);
+					
+				}
+			}
+		}
+	}
+	
 }	
 // Close connection
 mysqli_close($link);
@@ -476,6 +766,10 @@ mysqli_close($link);
 	
 	<div align = "center">
 	<p><?php echo $incomingPay; ?></p>
+	</div>
+	
+	<div style="padding-left: 40%;padding-right: 40%;" align = "right">
+	<p><?php echo $userAccountArea; ?></p>
 	</div>
 	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">

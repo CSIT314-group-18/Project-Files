@@ -88,7 +88,7 @@ mysqli_close($link);
     </div>
 	<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
 		<div class="form-group <?php echo (!empty($car_err)) ? 'has-error' : ''; ?>">
-			<ul>
+			<ul style='list-style-type:none'>
 			<li><input type="text" name="model"class="form-control" placeholder="Model" required></li>
 			<li><select class="form-control" name="manufacturer" required>
 			  <option value="" disabled selected>Manufacturer</option>
