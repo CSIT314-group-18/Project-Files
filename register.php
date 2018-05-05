@@ -131,11 +131,49 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
             
             // Attempt to execute the prepared statement
+            if(!mysqli_stmt_execute($stmt)){	
+                echo "Something went wrong. Please try again later.";
+            }
+        }
+         
+        // Close statement
+        mysqli_stmt_close($stmt);
+		
+		
+		$sql = "SELECT users_id FROM users WHERE username = ?";
+        
+        if($stmt = mysqli_prepare($link, $sql)){
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($stmt, "s", $param_username);
+            
+            // Attempt to execute the prepared statement
+            if(mysqli_stmt_execute($stmt)){
+                
+				/* store result */
+				mysqli_stmt_store_result($stmt);
+				mysqli_stmt_bind_result($stmt, $users_id);
+				mysqli_stmt_fetch($stmt);
+				
+            } else{
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+        }
+         
+        // Close statement
+        mysqli_stmt_close($stmt);
+		
+		$sql = "UPDATE location SET users_id = ? WHERE location_id = ?";
+        
+        if($stmt = mysqli_prepare($link, $sql)){
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($stmt, "ii", $users_id, $location_id);
+            
+            // Attempt to execute the prepared statement
             if(mysqli_stmt_execute($stmt)){
                 // Redirect to login page
                 header("location: login.php");
             } else{
-                echo "Something went wrong. Please try again later.";
+                echo "Oops! Something went wrong. Please try again later.";
             }
         }
          
