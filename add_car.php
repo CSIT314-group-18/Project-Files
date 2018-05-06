@@ -42,17 +42,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$param_manufacturer = trim($_POST['manufacturer']);
 		$param_transmission = trim($_POST['transmission']);
 		$param_odometer = trim($_POST['odometer']);
+		$status = "listed";
 		
 		// Validate car
 		if(empty($_POST["carSubmit"]) || !is_numeric($param_odometer)){
 			$car_err = "Please enter a car.";
 		} else{
 			// Prepare an insert statement
-			$sql = "INSERT INTO car (model, manufacturer, transmission, odometer, users_id) VALUES (?, ?, ?, ?, ?)";
+			$sql = "INSERT INTO car (model, manufacturer, transmission, odometer, status, users_id) VALUES (?, ?, ?, ?, ?, ?)";
 			
 			if($stmt = mysqli_prepare($link, $sql)){
 				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "sssii", $param_model, $param_manufacturer, $param_transmission, $param_odometer, $users_id);
+				mysqli_stmt_bind_param($stmt, "sssisi", $param_model, $param_manufacturer, $param_transmission, $param_odometer, $status, $users_id);
 				
 				// Attempt to execute the prepared statement
 				if(mysqli_stmt_execute($stmt)){

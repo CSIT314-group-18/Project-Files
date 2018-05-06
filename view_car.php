@@ -15,7 +15,7 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 
 //get the car that they clicked
 $textArea = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT * FROM car WHERE car_id = " . $car_id;
+$getCarSql = "SELECT car_id, image, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement

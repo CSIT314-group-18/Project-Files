@@ -22,12 +22,13 @@ if($Pstmt = mysqli_prepare($link, $Psql)){
 		mysqli_stmt_store_result($Pstmt);
 		mysqli_stmt_bind_result($Pstmt, $tempUser);
 		
-		$userSearchString = " WHERE";
+		$userSearchString = " users_id IN (";
 		while(mysqli_stmt_fetch($Pstmt)){
-			$userSearchString .= " users_id = " . $tempUser . " OR";
+			$userSearchString .= $tempUser . ", ";
 		}
 		
-		$userSearchString = substr($userSearchString, 0, -3);
+		$userSearchString = substr($userSearchString, 0, -2);
+		$userSearchString .= ")";
 		
 	} else{
 		echo "Oops! Something went wrong. Please try again later.";
@@ -82,17 +83,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 					mysqli_stmt_store_result($Pstmt);
 					mysqli_stmt_bind_result($Pstmt, $tempUser);
 					
-					$userSearchString = " WHERE";
+					$userSearchString = " users_id IN (";
 					$foundId = false;
 					
 					while(mysqli_stmt_fetch($Pstmt)){
-						$userSearchString .= " users_id = " . $tempUser . " OR";
+						$userSearchString .= $tempUser . ", ";
 						$foundId = true;
 					}
 					if($foundId == true){
-						$userSearchString = substr($userSearchString, 0, -3);
+						$userSearchString = substr($userSearchString, 0, -2);
+						$userSearchString .= ")";
 					}else{
-						$userSearchString = " WHERE users_id = 0";
+						$userSearchString = "0)";
 					}
 					
 				} else{
@@ -120,8 +122,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 //get all the cars
 $textArea = $car_id = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer FROM car" . $userSearchString;
-
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer FROM car WHERE status = 'listed' AND" . $userSearchString;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement

@@ -39,8 +39,9 @@ if($verified == 1){
 
 
 //get all the cars a user has ready
-$textArea = $car_id = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer FROM car WHERE users_id = " . $users_id;
+$textArea = $model = $manufacturer = $transmission = $status = "";
+$car_id = $odometer = 0;
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, status FROM car WHERE users_id = " . $users_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -48,18 +49,26 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $status);
 		if(mysqli_stmt_num_rows($getCarSqlStmt) != 0){
                     $textArea = "<label>Your current cars:</label>";
 		}
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
 			$textArea .= "<ul style='list-style-type:none'><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
-			$textArea .= "<li>" . $odometer . '<br><button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
+			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
 			<div id="odoChange' . $car_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="text" name="odo" class="form-control" value= "' . $odometer . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="odoChange" class="btn btn-primary" value="Submit"></form></div></li></ul>';
+			<input type="submit" name="odoChange" class="btn btn-primary" value="Submit"></form></div></li>
+			<li>' . $status . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'statusChange'," . $car_id . ')">List/Unlist Car</button>
+			<div id="statusChange' . $car_id . '" style="display:none">
+			<p>Are you sure you want to switch your cars listed status?<br> (you can change it again later)</p>
+			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="hidden" name="status" class="form-control" value= "' . $status . '">
+			<input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<input type="submit" name="statusChange" class="btn btn-primary" value="Change status"></form></div>
+			</il></ul>';
 			$textArea .= '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . $car_id . ')">Remove Car From Our Site</button>
 			<div id="deleter' . $car_id . '" style="display:none">
 			<p>Are you really sure you want to delete this car from the site?</p>
@@ -710,6 +719,38 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 		}
 	}
+	
+	if(isset($_POST["statusChange"])) {
+		$status = trim($_POST["status"]);
+		$this_car_id = trim($_POST["this_car_id"]);
+		
+		if($status == "listed"){
+			$status = "unlisted";
+		}else {
+			$status = "listed";
+		}
+		
+		$sql = "UPDATE car SET status = ? WHERE car_id = " . $this_car_id;
+					
+					if($stmt = mysqli_prepare($link, $sql)){
+						// Bind variables to the prepared statement as parameters
+						mysqli_stmt_bind_param($stmt, "s", $status);
+
+						// Attempt to execute the prepared statement
+						if(mysqli_stmt_execute($stmt)){
+							/* store result */
+							mysqli_stmt_store_result($stmt);
+							echo "Status changed successfully.";
+							header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+						} else{
+							echo "Oops! Something went wrong. Please try again later.";
+						}
+					}
+					// Close statement
+					mysqli_stmt_close($stmt);
+		
+	}
+	
 	
 }	
 // Close connection
