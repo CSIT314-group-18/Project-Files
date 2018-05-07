@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>tt</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans'>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+	<div id="container">
+	<header>
+		<h1>Rentaro</h1>
+	</header>
+	<nav>
+		<ul>
+			<a href=""><li>Home</li></a>
+			<a href=""><li>About</li></a>
+			<a href=""><li>Gallery</li></a>
+			<a href=""><li>Contact</li></a>
+			<a href=""><li>Login</li></a>
+			<button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Sign Up</button>
+		</ul>
+
+		
+		<div class="handle">Menu</div>
+	</nav>
+	
+	<section>
+ <!--<input type="text" name="search" placeholder="search">-->
+ <!--Sign Up Modal by Anthony-->
+<div id="id01" class="modal">
+	<span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">×</span>
+	<form class="modal-content animate" action="/action_page.php">
+		<div class="container">
+
+			<label><b>Name</b></label>
+			<table width ="100%">
+				<tr>
+					<td>
+						<input type="text" placeholder="First Name" name="fName" required>
+					</td>
+					<td>		
+						<input type="text" placeholder="Last Name" name="lName" required>
+					</td>
+				</tr>
+			</table>
+			<!--
+			<div>
+				<input type="text" placeholder="Enter Name" name="fName" required>
+			</div>
+			/!-->
+			<label><b>Email</b></label>
+			<div>
+				<input type="text" placeholder="Enter Email" name="email" required>
+				<input type="text" placeholder="Confirm Email" name="email-repeat" required>
+			</div>
+
+			<label><b>Password</b></label>
+			<div>
+				<input type="password" placeholder="Enter Password" name="psw" required>
+				<input type="password" placeholder="Repeat Password" name="psw-repeat" required>
+			</div>
+
+			<label><b>Address</b></label>
+			<table	style ="width:100%">
+				<tr>
+					<td colspan ="2">
+						<input type="text" placeholder="Street Address" name="streetAd" required>
+					</td>
+
+				</tr>
+				<tr>
+					<td class="Styledrop">
+						  <select name="States">
+							<option value="0">NSW</option>
+							<option value="1">Qld</option>
+							<option value="2">Vic</option>
+							<option value="3">WA</option>
+							<option value="4">NT</option>
+							<option value="5">SA</option>
+							<option value="6">Tas</option>
+						  </select>
+					</td>		
+					<td>
+						<input type="text" placeholder="City" name="CityAd" required>
+					</td>
+				</tr>
+
+			</table>
+
+			<table style="width: 50%">
+				<tr>
+					<td>
+				<input  type="text" placeholder="Zipcode" name="ZipAd" required>			
+					</td>
+				</tr>
+
+			</table>
+
+			<table>
+				<tr>
+				<td><label>
+					<input type="radio" name="Gender" value="M" id="Gender_0" required>
+					Male
+					</label></td>
+				<td><label>
+					<input type="radio" name="Gender" value="F" id="Gender_1" required>
+					Female
+				</label></td>
+				</tr>
+			</table>
+
+			<p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
+
+			<div class="clearfix">
+				<button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+				<button type="submit" class="signupbtn">Sign Up</button>
+			</div>
+		</div>
+	</form>
+</div>
+<!--Container-->
+<div class="w3-container w3-content" style="max-width:1000px;margin-top:80px">    
+  <!-- The Grid -->
+  <div class="w3-row">
+    <!-- Left Column -->
+    <div class=" w3-row w3-col m3">
+      <!-- Profile -->
+      <div class="w3-card w3-round w3-white" style="width:300px;">
+        <div class="w3-container">
+         <h4 class="w3-center">#UserName</h4>
+         <p class="w3-center"><img src="https://www.w3schools.com/w3css/img_avatar3.png" class="w3-circle" style="height:106px;width:106px" alt="Avatar"></p>
+         <hr>
+         <p><i class="fa fa-envelope fa-fw w3-margin-right w3-text-theme"></i>email@address.com</p>
+         <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Location</p>
+         <p><i class="fa fa-birthday-cake fa-fw w3-margin-right w3-text-theme"></i> Month Day, Year</p>
+		 <p><i class="fa fa-male fa-fw w3-margin-right w3-text-theme"></i> Gender</p>
+		 <p><i class="fa fa-dollar fa-fw w3-margin-right w3-text-theme"></i>Amount:</p>
+		  <div class="w3-container">
+          <p>Car Availability:          </p>
+          <p>Friday 15:00</p>
+          <p><button class="w3-button w3-block w3-theme-l4">Info</button></p>
+        </div>
+        </div>
+      </div>
+      <br>
+	        <div class="w3-card-2 w3-round w3-white w3-hide-small" style="width:300px;">
+        <div class="w3-container" style="width:300px;">
+          <p>Options</p>
+          <p>
+            <button class="fa fa-envelope " onclick=""> Messages</button>
+            <button class="fa fa-gear" onclick=""> Edit Profile</button>
+            <button class="fa fa-question" onclick=""> Help </button>
+            <button class="fa fa-dollar" onclick=""> Make Payment</button>          
+          </p>
+        </div>
+      </div>
+      <br>
+	 </div>
+	 <!--Post-->
+<div class="w3-half" style="float:right; width:650px;">
+      <div class="w3-row-padding">
+        <div class="w3-col m12">
+          <div class="w3-card-2 w3-round w3-white">
+            <div class="w3-container w3-padding">
+              <h6 class="w3-opacity"></h6>
+			  <p>Make</p>
+              <input class="w3-border w3-padding" style="width:70%;" id="subject">
+			  <p>Model</p>
+			  <input class="w3-border w3-padding" style="width:70%;" id="time">
+			  <p>Year</p>
+			  <input class="w3-border w3-padding" style="width:70%;"id="cost">
+			  <p>Cost</p>
+			 <input class="w3-border w3-padding" style="width:70%;" id="level">
+			 
+			 <br><br>
+              <button type="button" class="w3-button w3-theme w3-padding" style="width:30%;">
+			  <i class="fa fa-pencil"></i> Post</button> 
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+
+	</body>
+</html>
