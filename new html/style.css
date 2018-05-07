@@ -1,0 +1,231 @@
+body{
+	margin: 0;
+	padding: 0;
+	font-family: garamond;
+}
+
+header{
+	background: #87AFC7;
+	width: 100%;
+	padding:20px 0;
+	color: white;
+	text-align: center;
+}
+
+header h1{
+	text-align: left;
+	padding: 20px;
+}
+
+header form{
+	text-align: right;
+	padding: 20px;
+}
+
+header form button{
+	text-align: right;
+	padding: 20px;
+}
+
+nav ul{
+	background-color: #4B738B;
+	overflow: hidden;
+	color: white;
+	padding: 0;
+	text-align: center; 
+	margin: 0;
+	-webkit-transition: max-height 0.5s;
+	-moz-transition: max-height 0.5s;
+	-ms-transition: max-height 0.5s;
+}
+
+nav	ul	li{
+	display: inline-block;
+	padding: 20px;
+}
+
+nav	ul	li:hover{
+	background-color: #00233B;
+}
+
+a{
+	text-decoration: none;
+	color: inherit;
+}
+
+section{
+	line-height: 1.5em;
+	font-size: 1em;
+	padding:  40px;
+	width: 75%;
+	margin: 0 auto;
+
+}
+
+.left{
+	width: 20%;
+	height: 100px;
+	float: left;
+	background: #F5F5F5;
+	overflow:hidden;
+	word-wrap: break-word;
+	padding: 15px 15px;
+	border-style: groove;
+}
+
+.middle{
+	width: 20%;
+	height: 100px;
+	float: left;
+	background: #F5F5F5;
+	display: block;
+	padding: 15px 15px; 
+	border-style: groove;
+}
+
+.googleMap{
+	float: right;
+	padding: 15px 15px;
+}
+
+.handle{
+	width: 100%;
+	background: #0A2D45;
+	text-align: left;
+	box-sizing: border-box;
+	padding: 15px 10px;
+	cursor: pointer;
+	display: none;
+	color: white;
+}
+
+@media screen and (max-width: 640px){
+	nav ul li{
+		width: 100%;
+		box-sizing: border-box;
+		padding: 15px;
+		text-align: left;
+	}
+
+	.handle{
+		display:block;
+	}
+
+	nav ul{
+		max-height: 0;
+	}
+
+	.showing{
+		max-height: 20em;
+	}
+}
+/* Full-width input fields */
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+/* Style for States drop down */
+.Styledrop select {
+   background: white;
+   border: none;
+   font-size: 14px;
+   height: 40px;
+   padding: 5px;
+	width : 100%;
+   max-width: 200px;
+   min-width: 70px;
+}
+/* Set a style for all buttons */
+button {
+    background-color: #4B738B;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+button:hover{
+    opacity: 0.8;
+}
+
+/* Extra styles for the cancel button and signup */
+.cancelbtn {
+    padding: 14px 20px;
+    background-color: #87AFC7;
+}
+.signupbtn{
+	padding: 14px 20px;
+    background-color: #395d72;
+}
+/* Float cancel and signup buttons and add an equal width */
+.cancelbtn,.signupbtn {float:left;width:50%}
+
+/* Add padding to container elements */
+.container {
+	color : white;
+	background-color: #4B738B;
+    padding: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+    position: absolute;
+    right: 35px;
+    top: 15px;
+    color: #000;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: red;
+    cursor: pointer;
+}
+
+/* Clear floats */
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Change styles for cancel button and signup button on extra small screens */
+@media screen and (max-width : 200px ){
+    .cancelbtn, .signupbtn {
+       width: 100%;
+    }
+}
+
+@media screen and (max-width : 320px ){
+        #container{
+			width: 320px;
+		}
+}

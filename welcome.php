@@ -63,7 +63,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			<input type="submit" name="odoChange" class="btn btn-primary" value="Submit"></form></div></li>
 			<li>' . $status . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'statusChange'," . $car_id . ')">List/Unlist Car</button>
 			<div id="statusChange' . $car_id . '" style="display:none">
-			<p>Are you sure you want to switch your cars listed status?<br> (you can change it again later)</p>
+			<p>Are you sure you want to<br> switch your cars listed status?<br> (you can change it again later)</p>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="status" class="form-control" value= "' . $status . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
@@ -71,7 +71,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			</il></ul>';
 			$textArea .= '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . $car_id . ')">Remove Car From Our Site</button>
 			<div id="deleter' . $car_id . '" style="display:none">
-			<p>Are you really sure you want to delete this car from the site?</p>
+			<p>Are you really sure you want <br>to delete this car from the site?</p>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="deleteCar" class="btn btn-danger" value="Delete">
@@ -171,7 +171,7 @@ $deleteAccountArea = '<button class="btn btn-danger" onclick="showChanger(' . "'
 //Get any incoming requests for the users cars
 $status = $startdate = $enddate = $incomingReserv = "";
 $reservation_id = $owner = $renter = $rented_car_id = 0;
-$getReservSql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'requested' AND renter = " . $users_id;
+$getReservSql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'requested' AND owner = " . $users_id;
 if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 	
 	// Attempt to execute the prepared statement
@@ -186,7 +186,7 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 			
 			//get the name of the renter
 			$renter_name = "";
-			$getRenteeSql = "SELECT username FROM users WHERE users_id = " . "'" . $owner . "'";
+			$getRenteeSql = "SELECT username FROM users WHERE users_id = " . "'" . $renter . "'";
 			if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
 			
 				// Attempt to execute the prepared statement
@@ -203,7 +203,7 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 			
 			//get the name of the renter
 			$car_name = "";
-			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $users_id . "'";
+			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . $users_id;
 			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
 			
 				// Attempt to execute the prepared statement
@@ -782,7 +782,7 @@ mysqli_close($link);
         <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Welcome to our site.</h1>
     </div>
 	
-	<div style = "position: absolute; left: 10px;">
+	<div style = "position: absolute; left: 10px;"  align = "right">
 		<p><?php echo $textArea; ?></p>
 		
 		<div <?php echo $divArea; ?>>

@@ -15,7 +15,7 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 
 //get the car that they clicked
 $textArea = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT * FROM car WHERE car_id = " . $car_id;
+$getCarSql = "SELECT car_id, image, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -37,6 +37,45 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 // Close statement
 mysqli_stmt_close($getCarSqlStmt);
 
+//Show when this car is booked:
+
+$showBookedArea = "";
+$sql = "SELECT startdate, enddate FROM reservation WHERE car_id = " . $car_id;
+if($stmt = mysqli_prepare($link, $sql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($stmt)){
+		
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($stmt);
+		
+		if(mysqli_stmt_num_rows($stmt) != 0){
+			$showBookedArea = "<label>This car is booked from:</label><ul style='list-style-type:none'>";
+        }
+		
+		mysqli_stmt_bind_result($stmt, $startdate, $enddate);
+		
+		//populate the html text field variable
+		while(mysqli_stmt_fetch($stmt)){
+			$startdate = substr($startdate, 0, -8);
+			$enddate = substr($enddate, 0, -8);
+			
+			$startdate = strtotime($startdate);
+			$enddate = strtotime($enddate);
+			
+			
+			$startdate = date('D d/m/Y', $startdate);
+			$enddate = date('D d/m/Y', $enddate);
+			
+			$showBookedArea .= '<li>' . $startdate .' <b>until</b> ' . $enddate .'</li>';
+		}
+		$showBookedArea .= '</ul>';
+	}
+}
+// Close statement
+mysqli_stmt_close($stmt);
+
+
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
@@ -48,9 +87,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$param_startdate = trim($_POST['startdate']);
 		$param_enddate = trim($_POST['enddate']);
 		
-		if(empty($param_startdate || $param_startdate)){
+		if(empty($param_startdate || $param_enddate)){
 			echo "Please choose dates for your booking.";
-			
+		} else if(strtotime($param_startdate) > strtotime($param_enddate)){
+			echo "Your start date must be before your end date.";
 		}else{
 			
 			
@@ -80,28 +120,64 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 			// Close statement
 			mysqli_stmt_close($carCheckSqlStmt);
-
 			
+			$alreadyBooked = false;
 			
-			
-			// Prepare an insert statement
-			$sql = "INSERT INTO reservation (status, startdate, enddate, renter, rentee, car_id) VALUES (?, ?, ?, ?, ?, ?)";
-			
+			$sql = "SELECT startdate, enddate FROM reservation WHERE car_id = " . $car_id;
 			if($stmt = mysqli_prepare($link, $sql)){
-				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "sssiii", $status, $param_startdate, $param_enddate, $car_owner_users_id, $_SESSION['users_id'], $car_id);
-				
+
 				// Attempt to execute the prepared statement
 				if(mysqli_stmt_execute($stmt)){
-					/* store result */
+
+					// Store result, print it to the variable
 					mysqli_stmt_store_result($stmt);
-					header("location: /welcome.php");
-				} else{
-					echo "Oops! Something went wrong. Please try again later.";
+
+					mysqli_stmt_bind_result($stmt, $startdate, $enddate);
+
+					//populate the html text field variable
+					while(mysqli_stmt_fetch($stmt)){
+						$startdate = strtotime($startdate);
+						$enddate = strtotime($enddate);
+						$temp_param_startdate = strtotime($param_startdate);
+						$temp_param_enddate = strtotime($param_enddate);
+						
+						for($i=$startdate; ($i<=$enddate) &&$alreadyBooked == false; $i+=86400){
+							for($j=$temp_param_startdate; ($j<=$temp_param_enddate)&& $alreadyBooked == false; $j+=86400){
+								if($i == $j){
+									echo "You can't book those dates, because this car is already booked at " . date('d/m/Y', $j);
+									$alreadyBooked = true;
+								}
+							}
+						}
+					}
 				}
 			}
 			// Close statement
 			mysqli_stmt_close($stmt);
+			
+			
+			if($alreadyBooked == false){
+				// Prepare an insert statement
+				$sql = "INSERT INTO reservation (status, startdate, enddate, owner, renter, car_id) VALUES (?, ?, ?, ?, ?, ?)";
+
+				if($stmt = mysqli_prepare($link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "sssiii", $status, $param_startdate, $param_enddate, $car_owner_users_id, $_SESSION['users_id'], $car_id);
+					
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						mysqli_stmt_store_result($stmt);
+						header("location: /welcome.php");
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+			}
+			
+			
 		}
 	}
 }	
@@ -118,6 +194,7 @@ mysqli_close($link);
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
     <style type="text/css">
         body{ font: 14px sans-serif; text-align: center; }
+		
     </style>
 </head>
 <body>
@@ -132,6 +209,10 @@ mysqli_close($link);
 		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate"> <br>
 		<input type="submit" name="reqConf" class="btn btn-primary" value="Confirm Request">
 	</form>
+	
+	<div style="position: absolute; left: 10px;">
+		<?php echo $showBookedArea; ?>
+	</div>
 	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
