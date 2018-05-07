@@ -14,10 +14,6 @@ ALTER TABLE car_rating
 ADD FOREIGN KEY (car_id) REFERENCES car(car_id)
 ON DELETE CASCADE;
 
-ALTER TABLE location
-ADD FOREIGN KEY (users_id) REFERENCES users(users_id)
-ON DELETE CASCADE;
-
 ALTER TABLE reservation
 ADD FOREIGN KEY (owner) REFERENCES users(users_id)
 ON DELETE CASCADE;
@@ -26,6 +22,13 @@ ADD FOREIGN KEY (renter) REFERENCES users(users_id)
 ON DELETE CASCADE;
 ALTER TABLE reservation
 ADD FOREIGN KEY (car_id) REFERENCES car(car_id)
+ON DELETE CASCADE;
+
+ALTER TABLE payment
+ADD FOREIGN KEY (owner) REFERENCES users(users_id)
+ON DELETE CASCADE;
+ALTER TABLE payment
+ADD FOREIGN KEY (renter) REFERENCES users(users_id)
 ON DELETE CASCADE;
 
 ALTER TABLE message
