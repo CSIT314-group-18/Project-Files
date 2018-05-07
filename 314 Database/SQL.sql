@@ -27,9 +27,17 @@ CREATE TABLE car (
     transmission VARCHAR(50) NOT NULL,
     odometer INT NOT NULL,
 	fee DOUBLE NOT NULL,
-	car_status VARCHAR(50) NOT NULL,
     users_id INT NOT NULL,
 	PRIMARY KEY (car_id)
+);
+
+CREATE TABLE car_av (
+	av_id INT NOT NULL AUTO_INCREMENT,
+	startdate DATETIME NOT NULL,
+	enddate DATETIME NOT NULL,
+	car_av_status VARCHAR(50) NOT NULL,
+	car_id INT NOT NULL,
+	PRIMARY KEY (av_id)
 );
 
 CREATE TABLE car_rating (
