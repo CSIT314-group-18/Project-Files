@@ -39,7 +39,7 @@ mysqli_stmt_close($getCarSqlStmt);
 
 //Show when this car is booked:
 
-$showBookedArea = "";
+$showBookedArea = $showAmountArea = "";
 $sql = "SELECT startdate, enddate FROM reservation WHERE car_id = " . $car_id;
 if($stmt = mysqli_prepare($link, $sql)){
 	
@@ -75,17 +75,48 @@ if($stmt = mysqli_prepare($link, $sql)){
 // Close statement
 mysqli_stmt_close($stmt);
 
+//initialise variables
+$param_startdate = $param_enddate = "";
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
+	
+	
+	//show how much it would cost
+	if(isset($_POST["showAmount"])){
+		$amount = 0;
+		$param_startdate = trim($_POST['startdate']);
+		$param_enddate = trim($_POST['enddate']);
+		$days = 0;
+		
+		//add the money based on how many days they booked
+		$temp_param_startdate = strtotime($param_startdate);
+		$temp_param_enddate = strtotime($param_enddate);
+		for($j=$temp_param_startdate; $j<=$temp_param_enddate; $j+=86400){
+			$amount += 50.0;
+			$days++;
+		}
+		
+		$showAmountArea = "To book this car for " . $days . " days, it would cost $" . $amount . ". ";
+	}
+	
 	
 	//to put through an actual request
 	if(isset($_POST["reqConf"])){
 		
 		// Set parameters
 		$status = "requested";
+		$amount = 50.0;
 		$param_startdate = trim($_POST['startdate']);
 		$param_enddate = trim($_POST['enddate']);
+		
+		//add the money based on how many days they booked
+		$temp_param_startdate = strtotime($param_startdate);
+		$temp_param_enddate = strtotime($param_enddate);
+		for($j=$temp_param_startdate; $j<=$temp_param_enddate; $j+=86400){
+			$amount += 50.0;
+		}
+		
 		
 		if(empty($param_startdate || $param_enddate)){
 			echo "Please choose dates for your booking.";
@@ -175,6 +206,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				}
 				// Close statement
 				mysqli_stmt_close($stmt);
+				
+				
+				// Prepare an insert statement to payment
+				$sql = "INSERT INTO payment (payment_status, total_fee, owner, renter) VALUES (?, ?, ?, ?)";
+
+				if($stmt = mysqli_prepare($link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "sdii", $status, $amount, $car_owner_users_id, $_SESSION['users_id']);
+					
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						mysqli_stmt_store_result($stmt);
+						header("location: /welcome.php");
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
 			}
 			
 			
@@ -205,11 +256,12 @@ mysqli_close($link);
 	<p><?php echo $textArea; ?></p>
 	
 	<form action= "<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-		Start date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="startdate"> <br>
-		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate"> <br>
+		Start date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="startdate" value="<?php echo $param_startdate; ?>"> <br>
+		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate" value="<?php echo $param_enddate; ?>"> <br>
+		<input type="submit" name="showAmount" class="btn" value="Estimate Cost">
 		<input type="submit" name="reqConf" class="btn btn-primary" value="Confirm Request">
 	</form>
-	
+	<p><?php echo $showAmountArea; ?></p>
 	<div style="position: absolute; left: 10px;">
 		<?php echo $showBookedArea; ?>
 	</div>

@@ -5,6 +5,7 @@ require_once 'config.php';
 // Define variables and initialize with empty values
 $username = $password = "";
 $username_err = $password_err = "";
+$users_id = 0;
  
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -26,7 +27,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Validate credentials
     if(empty($username_err) && empty($password_err)){
         // Prepare a select statement
-        $sql = "SELECT username, password FROM users WHERE username = ?";
+        $sql = "SELECT username, password, users_id FROM users WHERE username = ?";
         
         if($stmt = mysqli_prepare($link, $sql)){
             // Bind variables to the prepared statement as parameters
@@ -34,7 +35,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             
             // Set parameters
             $param_username = $username;
-            
+			
             // Attempt to execute the prepared statement
             if(mysqli_stmt_execute($stmt)){
                 // Store result
@@ -43,14 +44,42 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // Check if username exists, if yes then verify password
                 if(mysqli_stmt_num_rows($stmt) == 1){                    
                     // Bind result variables
-                    mysqli_stmt_bind_result($stmt, $username, $hashed_password);
+                    mysqli_stmt_bind_result($stmt, $username, $hashed_password, $users_id);
                     if(mysqli_stmt_fetch($stmt)){
                         if(password_verify($password, $hashed_password)){
                             /* Password is correct, so start a new session and
                             save the username to the session */
                             session_start();
-                            $_SESSION['username'] = $username;      
-                            header("location: welcome.php");
+                            $_SESSION['username'] = $username;    
+							
+							//check if they're an admin or not
+							$adminsql = "SELECT admins_id FROM admins WHERE users_id = ?";
+							if($adminstmt = mysqli_prepare($link, $adminsql)){
+								mysqli_stmt_bind_param($adminstmt, "i", $users_id);
+								
+								// Attempt to execute the prepared statement
+								if(mysqli_stmt_execute($adminstmt)){
+
+									// Store result, print it to the variable
+									mysqli_stmt_store_result($adminstmt);
+									//mysqli_stmt_bind_result($stmt, $car_name);
+									//mysqli_stmt_fetch($stmt);
+									
+									if(mysqli_stmt_num_rows($adminstmt) == 1){   
+										$_SESSION['isAdmin'] = true; 
+										header("location: welcome.php");
+									}else{
+										$_SESSION['isAdmin'] = false; 
+										header("location: welcome.php");
+									}
+								}
+							}
+							// Close statement
+							mysqli_stmt_close($adminstmt);
+							
+							
+							
+                            
                         } else{
                             // Display an error message if password is not valid
                             $password_err = 'The password you entered was not valid.';

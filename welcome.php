@@ -12,9 +12,9 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 }
 
 //get the verified variable and the user id from this user, to see if they need to be
-$verified = $users_id = $location_id = 0;
+$verified = $users_id = $location_id = $account_suspended = 0;
 $divArea = "";
-$getVerSql = "SELECT users_id, verifed, location_id FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
+$getVerSql = "SELECT users_id, verifed, location_id, account_suspended FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
 if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 	
 	// Attempt to execute the prepared statement
@@ -22,7 +22,7 @@ if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getVerSqlStmt);
-		mysqli_stmt_bind_result($getVerSqlStmt, $users_id, $verified, $location_id);
+		mysqli_stmt_bind_result($getVerSqlStmt, $users_id, $verified, $location_id, $account_suspended);
 		mysqli_stmt_fetch($getVerSqlStmt);
 	}
 }
@@ -32,11 +32,22 @@ mysqli_stmt_close($getVerSqlStmt);
 $_SESSION['location_id'] = $location_id;
 $_SESSION['users_id'] = $users_id;
 
+
+//link to admin page, if the user is an admin
+$adminArea = "";
+if($_SESSION['isAdmin'] == true){
+	$adminArea .= "<p><a href='/user_list_main.php' class='btn'>See All Users</a></p>";
+}
+
+
 //make the verify form hidden if the user is already verified
 if($verified == 1){
 	$divArea = "hidden";
 }
 
+$suspendedArea = "";
+if($account_suspended == 1)$suspendedArea = " <p>You are suspended. Appeal to an administrator <a>here</a> </p><div style='display:none'>";
+else $suspendedArea = "<div>";
 
 //get all the cars a user has ready
 $textArea = $model = $manufacturer = $transmission = $status = "";
@@ -138,7 +149,7 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 			<input type="submit" name="pwordChange" class="btn btn-primary" value="Submit Password Change"></form><br><br></div></li>
 			<li>' . $facebook . '&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'fbChange'," . $users_id . ')">Change Facebook Link</button>
 			<div id="fbChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="text" name="newFb" class="form-control">
+			<input type="text" name="newFb" class="form-control" value="' . $facebook . '">
 			<input type="submit" name="fbChange" class="btn btn-primary" value="Change Facebook Link"></form><br><br></div></li>
 			<li><h3>Your Location</h3><br>' . $street . '<br>' . $suburb . '<br>' . $postcode . '<br>' . $city . '<br>' . $country . '<br>' . '
 			<button class="btn" onclick="showChanger(' . "'addressChange'," . $users_id . ')">Change Address</button>
@@ -297,6 +308,7 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 }
 // Close statement
 mysqli_stmt_close($getPaySqlStmt);
+
 
 
 
@@ -483,6 +495,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				echo "Oops! Something went wrong. Please try again later.";
 			}
 		}
+		// Close statement
+		mysqli_stmt_close($payReqSql);
+		
+		
 		// Close statement
 		mysqli_stmt_close($payReqSql);
 	}
@@ -782,48 +798,52 @@ mysqli_close($link);
         <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Welcome to our site.</h1>
     </div>
 	
-	<div style = "position: absolute; left: 10px;"  align = "right">
-		<p><?php echo $textArea; ?></p>
-		
-		<div <?php echo $divArea; ?>>
-			<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-				<div class="form-group <?php echo (!empty($email_err)) ? 'has-error' : ''; ?>">
-					<label>Verify your account:</label>
-					<input type="text" name="email"class="form-control" value="<?php echo $email; ?>">
-					<span class="help-block"><?php echo $email_err; ?></span>
-				</div> 
-				<div class="form-group">
-						<input type="submit" name="emailVerify" class="btn btn-primary" value="Submit">
-				</div>
-			</form>
+	<?php echo $suspendedArea; ?>
+	
+		<div style = "position: absolute; left: 10px;"  align = "right">
+			<p><?php echo $textArea; ?></p>
+			
+			<div <?php echo $divArea; ?>>
+				<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+					<div class="form-group <?php echo (!empty($email_err)) ? 'has-error' : ''; ?>">
+						<label>Verify your account:</label>
+						<input type="text" name="email"class="form-control" value="<?php echo $email; ?>">
+						<span class="help-block"><?php echo $email_err; ?></span>
+					</div> 
+					<div class="form-group">
+							<input type="submit" name="emailVerify" class="btn btn-primary" value="Submit">
+					</div>
+				</form>
+			</div>
+			
+			<p><a href="add_car.php" class="btn">Add a car available for rent</a></p>
 		</div>
 		
-		<p><a href="add_car.php" class="btn">Add a car available for rent</a></p>
-	</div>
+		<div style = "position: absolute; right: 10px;">
+		<p><?php echo $incomingReserv; ?></p>
+		</div>
+		
+		<div align = "center">
+		<p><?php echo $incomingPay; ?></p>
+		</div>
+		
+		<div style="padding-left: 40%;padding-right: 40%;" align = "right">
+		<p><?php echo $userAccountArea; ?></p>
+		</div>
+		
+		<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+			<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
+			<?php echo $adminArea; ?>
+		</div>
+		
+		<div style="position: absolute; right: 10px; bottom: 10px; border: 3px;">
+			<?php echo $deleteAccountArea; ?>
+		</div>
+		
+		<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+			<p><a href="/logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
+		</div>
 	
-	<div style = "position: absolute; right: 10px;">
-	<p><?php echo $incomingReserv; ?></p>
 	</div>
-	
-	<div align = "center">
-	<p><?php echo $incomingPay; ?></p>
-	</div>
-	
-	<div style="padding-left: 40%;padding-right: 40%;" align = "right">
-	<p><?php echo $userAccountArea; ?></p>
-	</div>
-	
-	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
-	<p><a href="/logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
-	</div>
-	
-	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
-		<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
-	</div>
-	
-	<div style="position: absolute; right: 10px; bottom: 10px; border: 3px;">
-		<?php echo $deleteAccountArea; ?>
-	</div>
-	
 </body>
 </html>
