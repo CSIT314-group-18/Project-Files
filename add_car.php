@@ -106,7 +106,7 @@ mysqli_close($link);
 			  <option value="" disabled selected>Transmission</option>
 			  <option value="automatic">Automatic</option>
 			  <option value="manual">Manual</option>
-			</select></li></li>
+			</select></li>
 			<li><input type="text" name="odometer"class="form-control" placeholder="Current odometer reading" required></li>
 			</ul>
 			<span class="help-block"><?php echo $car_err; ?></span>
