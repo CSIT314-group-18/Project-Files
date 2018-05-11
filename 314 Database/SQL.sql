@@ -75,6 +75,7 @@ CREATE TABLE payment (
 	total_fee DOUBLE NOT NULL,
 	owner INT NOT NULL,
 	renter INT NOT NULL,
+	reservation_id INT NOT NULL,
 	PRIMARY KEY (payment_id)
 );
 
