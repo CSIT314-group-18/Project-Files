@@ -34,6 +34,9 @@ ON DELETE CASCADE;
 ALTER TABLE payment
 ADD FOREIGN KEY (renter) REFERENCES users(users_id)
 ON DELETE CASCADE;
+ALTER TABLE payment
+ADD FOREIGN KEY (reservation_id) REFERENCES reservation(reservation_id)
+ON DELETE CASCADE;
 
 ALTER TABLE message
 ADD FOREIGN KEY (sentby) REFERENCES users(users_id)
