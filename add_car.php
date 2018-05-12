@@ -12,8 +12,9 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 }
 
 // Define variables and initialize with empty values
-$car_err = "";
+$car_err = $newFileName = "";
 $users_id = "";
+$this_car_id = 0;
 
 //get the id of this user, so that we can use it when inputting the car later
 $getUserSql = "SELECT users_id FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
@@ -32,6 +33,9 @@ if($getUserSqlStmt = mysqli_prepare($link, $getUserSql)){
 }
 // Close statement
 mysqli_stmt_close($getUserSqlStmt);
+
+
+
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -58,14 +62,88 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				// Attempt to execute the prepared statement
 				if(mysqli_stmt_execute($stmt)){
 					/* store result */
+					
+					// get the car id of the car we just put in
+					$Gsql = "SELECT MAX(car_id) FROM car";
+						
+					if($Gstmt = mysqli_prepare($link, $Gsql)){
+						// Attempt to execute the prepared statement
+						if(mysqli_stmt_execute($Gstmt)){
+							/* store result */
+							mysqli_stmt_store_result($Gstmt);
+							mysqli_stmt_bind_result($Gstmt, $this_car_id);
+							mysqli_stmt_fetch($Gstmt);
+						} else{
+							echo "Oops! Something went wrong. Please try again later.";
+						}
+					}
+					// Close statement
+					mysqli_stmt_close($Gstmt);
+					
+					
 					mysqli_stmt_store_result($stmt);
-					header("location: welcome.php");
+					
 				} else{
 					echo "Oops! Something went wrong. Please try again later.";
 				}
 			}
 			// Close statement
 			mysqli_stmt_close($stmt);
+		}
+		
+		if(isset($_FILES["fileToUpload"])){
+			//initialise photo uploading code
+			$target_dir = "car_image/";
+			
+			//convert photo to its new name from the car_id
+			$temp = explode(".", $_FILES["fileToUpload"]["name"]);
+			$newFileName = $this_car_id . '.' . end($temp);
+			$target_file = $target_dir . $newFileName;
+			$this_car_id = 0;
+			$uploadOk = 1;
+			$imageFileType = strtolower(end($temp));
+			echo $newFileName;
+
+			//everything to do with uploading a file
+			$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+			if($check !== false) {
+				echo "File is an image - " . $check["mime"] . ".";
+				$uploadOk = 1;
+			} else {
+				echo "File is not an image.";
+				$uploadOk = 0;
+			}
+			
+			// Check if file already exists
+			if (file_exists($target_file)) {
+				echo "Sorry, file already exists.";
+				$uploadOk = 0;
+			}
+			// Check file size
+			if ($_FILES["fileToUpload"]["size"] > 500000) {
+				echo "Sorry, your file is too large.";
+				$uploadOk = 0;
+			}
+			// Allow certain file formats
+			if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+			&& $imageFileType != "gif" ) {
+				echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+				$uploadOk = 0;
+			}
+			// Check if $uploadOk is set to 0 by an error
+			if ($uploadOk == 0) {
+				echo "Sorry, your file was not uploaded.";
+			// if everything is ok, try to upload file
+			} else {
+				if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+					echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+					header("location: welcome.php");
+				} else {
+					echo "Sorry, there was an error uploading your file.";
+				}
+			}
+		}else{
+			echo "Please choose a photo for your car.";
 		}
 	}
 }	
@@ -87,9 +165,12 @@ mysqli_close($link);
     <div class="page-header">
         <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Please enter your car information below:</h1>
     </div>
-	<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+	<form enctype="multipart/form-data" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
 		<div class="form-group <?php echo (!empty($car_err)) ? 'has-error' : ''; ?>">
-			<ul style='list-style-type:none'>
+			Select image to upload:
+			
+			<ul style='list-style-type:none; padding-left:35%; padding-right:35%;'>
+			<li><input type="file" class="form-control" name="fileToUpload" id="fileToUpload"></li>
 			<li><input type="text" name="model"class="form-control" placeholder="Model" required></li>
 			<li><select class="form-control" name="manufacturer" required>
 			  <option value="" disabled selected>Manufacturer</option>

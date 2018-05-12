@@ -250,7 +250,19 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
-			$textArea .= "<ul style='list-style-type:none'><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
+			
+			//get a cars picture
+			$target_file = "car_image/" . $car_id . ".*";
+			$target_file = glob($target_file);
+			
+			// Check if file already exists
+			if (!empty($target_file)) {
+				$prelimPhotoArea = "<img src='" . current($target_file) . "' alt='" . $car_id . "' style='width:200px;'>";
+			}else{
+				$prelimPhotoArea = "";
+			}
+			
+			$textArea .= "<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>" . $odometer . '<br>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
@@ -258,7 +270,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			$textArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="requestBooking" class="btn" value="Request This Car">
-			</form><br><br>';
+			</form><br><br><hr>';
 		}
 		$textArea .= "<br><br>";
 	}
