@@ -66,7 +66,21 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		}
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
-			$textArea .= "<ul style='list-style-type:none'><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
+			
+			//get a cars picture
+			$target_file = "car_image/" . $car_id . ".*";
+			$target_file = glob($target_file);
+			
+			// Check if file already exists
+			if (!empty($target_file)) {
+				$prelimPhotoArea = "<img src='" . current($target_file) . "' alt='" . $car_id . "' style='width:200px;'>";
+			}else{
+				$prelimPhotoArea = "";
+			}
+			
+			
+			$textArea .= "<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li>
+			<li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
 			<div id="odoChange' . $car_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="text" name="odo" class="form-control" value= "' . $odometer . '">
@@ -78,8 +92,15 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="status" class="form-control" value= "' . $status . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="statusChange" class="btn btn-primary" value="Change status"></form></div>
-			</il></ul>';
+			<input type="submit" name="statusChange" class="btn btn-primary" value="Change status"></form></div></li>
+			
+			<button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
+			<div id="photoChange' . $car_id . '" style="display:none">
+			<form enctype="multipart/form-data" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input type="file" class="form-control" name="' . $car_id . '">
+			<input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div>
+			</ul>';
 			$textArea .= '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . $car_id . ')">Remove Car From Our Site</button>
 			<div id="deleter' . $car_id . '" style="display:none">
 			<p>Are you really sure you want <br>to delete this car from the site?</p>
@@ -383,6 +404,72 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			mysqli_stmt_close($newOdoSqlStmt);
 		}
 	}
+	
+	//if user wants to change their photo
+	if(isset($_POST["photoChange"])){
+		
+		if(isset($_FILES[$_POST["this_car_id"]])){
+			//initialise photo uploading code
+			$target_dir = "car_image/";
+			
+			$this_car_id = trim($_POST["this_car_id"]);
+			$car_as_name = $_POST["this_car_id"];
+			echo $car_as_name;
+			
+			
+			//delte any existing photo for this car
+			//$old_file = $target_dir . $this_car_id . ".*";
+			//$old_file = glob($old_file);
+			//unlink(current($old_file));
+			
+			
+			//convert photo to its new name from the car_id
+			$temp = explode(".", $_FILES[$car_as_name]["name"]);
+			$newFileName = $this_car_id . '.' . end($temp);
+			$target_file = $target_dir . $newFileName;
+			$uploadOk = 1;
+			$imageFileType = strtolower(end($temp));
+			echo $newFileName;
+
+			//everything to do with uploading a file
+			$check = getimagesize($_FILES[$car_as_name]["tmp_name"]);
+			if($check !== false) {
+				echo "File is an image - " . $check["mime"] . ".";
+				$uploadOk = 1;
+			} else {
+				echo "File is not an image.";
+				$uploadOk = 0;
+			}
+			
+			// Check file size
+			if ($_FILES[$this_car_id]["size"] > 500000) {
+				echo "Sorry, your file is too large.";
+				$uploadOk = 0;
+			}
+			// Allow certain file formats
+			if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+			&& $imageFileType != "gif" ) {
+				echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+				$uploadOk = 0;
+			}
+			// Check if $uploadOk is set to 0 by an error
+			if ($uploadOk == 0) {
+				echo "Sorry, your file was not uploaded.";
+			// if everything is ok, try to upload file
+			} else {
+				if (move_uploaded_file($_FILES[$car_as_name]["tmp_name"], $target_file)) {
+					echo "The file ". basename( $_FILES[$car_as_name]["name"]). " has been uploaded.";
+					header("location: welcome.php");
+				} else {
+					echo "Sorry, there was an error uploading your file.";
+				}
+			}
+		}else{
+			echo "Please choose a photo for your car.";
+		}
+	}
+	
+	
 	
 	//for when they want to legit delete their car
 	if(isset($_POST["deleteCar"])){
@@ -832,17 +919,17 @@ mysqli_close($link);
 		</div>
 		
 		<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
-			<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
+			<p><a href="/car_list_main.php" class="btn">See All Cars</a>
 			<?php echo $adminArea; ?>
+			<p><a href="/messages.php" class="btn">See Your Messages</a>
+			</p>
 		</div>
-		
-		<div style="position: absolute; right: 10px; bottom: 10px; border: 3px;">
+		<br><br><br>
+		<a href="/logout.php" class="btn">Sign Out of Your Account</a>
+		<div style="position: absolute; padding: 10px; right: 10px; bottom: 10px; border: 3px;">
 			<?php echo $deleteAccountArea; ?>
 		</div>
 		
-		<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
-			<p><a href="/logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
-		</div>
 	
 	</div>
 </body>

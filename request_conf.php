@@ -27,9 +27,21 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
+			
+			//get a cars picture
+			$target_file = "car_image/" . $car_id . ".*";
+			$target_file = glob($target_file);
+			
+			// Check if file already exists
+			if (!empty($target_file)) {
+				$prelimPhotoArea = "<img src='" . current($target_file) . "' alt='" . $car_id . "' style='width:200px;'>";
+			}else{
+				$prelimPhotoArea = "";
+			}
+			
 			$textArea .= "<div class='page-header'>
 			<h1>" . $model . "</h1></div>
-			<ul style='list-style-type:none'><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
+			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
 			<li>" . $odometer . '</li></ul>';
 		}
 	}
