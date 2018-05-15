@@ -27,6 +27,7 @@ CREATE TABLE car (
     transmission VARCHAR(50) NOT NULL,
     odometer INT NOT NULL,
 	fee DOUBLE NOT NULL,
+	status VARCHAR(50),
     users_id INT NOT NULL,
 	PRIMARY KEY (car_id)
 );

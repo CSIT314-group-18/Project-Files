@@ -169,7 +169,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			
 			$alreadyBooked = false;
 			
-			$sql = "SELECT startdate, enddate FROM reservation WHERE status NOT IN ('declined') AND car_id = " . $car_id;
+			$sql = "SELECT startdate, enddate FROM reservation WHERE reservation_status NOT IN ('declined') AND car_id = " . $car_id;
 			if($stmt = mysqli_prepare($link, $sql)){
 
 				// Attempt to execute the prepared statement
@@ -204,7 +204,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			
 			if($alreadyBooked == false){
 				// Prepare an insert statement
-				$sql = "INSERT INTO reservation (status, startdate, enddate, owner, renter, car_id) VALUES (?, ?, ?, ?, ?, ?)";
+				$sql = "INSERT INTO reservation (reservation_status, startdate, enddate, owner, renter, car_id) VALUES (?, ?, ?, ?, ?, ?)";
 
 				if($stmt = mysqli_prepare($link, $sql)){
 					// Bind variables to the prepared statement as parameters
@@ -214,7 +214,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 					if(mysqli_stmt_execute($stmt)){
 						/* store result */
 						mysqli_stmt_store_result($stmt);
-						header("location: /welcome.php");
 					} else{
 						echo "Oops! Something went wrong. Please try again later.";
 					}
@@ -223,12 +222,38 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				mysqli_stmt_close($stmt);
 				
 				
+				
+				//get the reservation id we just made
+				$temp_res_id = 0;
+				$sql = "SELECT reservation_id FROM reservation WHERE startdate = ? AND enddate = ? AND owner = ? AND renter = ? AND car_id = ?";
+				if($stmt = mysqli_prepare($link, $sql)){
+					
+					mysqli_stmt_bind_param($stmt, "ssiii", $param_startdate, $param_enddate, $car_owner_users_id, $_SESSION['users_id'], $car_id);
+					
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($stmt);
+						
+						mysqli_stmt_bind_result($stmt, $temp_res_id);
+						echo $temp_res_id;
+						
+						//populate the html text field variable
+						mysqli_stmt_fetch($stmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+				
+				$status = "not paid";
+				
 				// Prepare an insert statement to payment
-				$sql = "INSERT INTO payment (payment_status, total_fee, owner, renter) VALUES (?, ?, ?, ?)";
+				$sql = "INSERT INTO payment (payment_status, total_fee, owner, renter, reservation_id) VALUES (?, ?, ?, ?, ?)";
 
 				if($stmt = mysqli_prepare($link, $sql)){
 					// Bind variables to the prepared statement as parameters
-					mysqli_stmt_bind_param($stmt, "sdii", $status, $amount, $car_owner_users_id, $_SESSION['users_id']);
+					mysqli_stmt_bind_param($stmt, "sdiii", $status, $amount, $car_owner_users_id, $_SESSION['users_id'], $temp_res_id);
 					
 					// Attempt to execute the prepared statement
 					if(mysqli_stmt_execute($stmt)){

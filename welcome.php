@@ -13,7 +13,7 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 
 //get the verified variable and the user id from this user, to see if they need to be
 $verified = $users_id = $location_id = $account_suspended = 0;
-$divArea = "";
+$divArea = $dummyPaymentArea = "";
 $getVerSql = "SELECT users_id, verifed, location_id, account_suspended FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
 if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 	
@@ -203,7 +203,7 @@ $deleteAccountArea = '<button class="btn btn-danger" onclick="showChanger(' . "'
 //Get any incoming requests for the users cars
 $status = $startdate = $enddate = $incomingReserv = "";
 $reservation_id = $owner = $renter = $rented_car_id = 0;
-$getReservSql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'requested' AND owner = " . $users_id;
+$getReservSql = "SELECT reservation_id, reservation_status, startdate, enddate, owner, renter, car_id FROM reservation WHERE reservation_status = 'requested' AND owner = " . $users_id;
 if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 	
 	// Attempt to execute the prepared statement
@@ -274,7 +274,7 @@ mysqli_stmt_close($getReservSqlStmt);
 //Get any payments this user is required to do
 $status = $startdate = $enddate = $incomingPay = "";
 $reservation_id = $owner = $renter = $rented_car_id = 0;
-$getPaySql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'accepted' AND renter = " . $users_id;
+$getPaySql = "SELECT reservation_id, reservation_status, startdate, enddate, owner, renter, car_id FROM reservation WHERE reservation_status = 'accepted' AND renter = " . $users_id;
 if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 	
 	// Attempt to execute the prepared statement
@@ -327,12 +327,33 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			$enddate = strtotime($enddate);
 			
 			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate);
-			$incomingPay .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
-			<input type="submit" name="pay" class="btn" value="Pay Now"></form>
+			$incomingPay .= '<br>
+			<button onclick="modalChanger(' . $reservation_id . ')" name="pay" class="btn btn-primary">Open Payment Options</button>
+		
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="cancel" class="btn" value="Cancel Reservation"></form>';
+			
+			
+			
+			$dummyPaymentArea .= '<div id="myModal' . $reservation_id . '" class="modal" style="display:none;"><div class="modal-content">';
+		
+			$dummyPaymentArea .= "<fieldset><legend>Card Details</legend><ul style='list-style-type:none;'><li>
+			<li>Paypal: <button>LOGIN</button><br><br><br>Or</li>
+			<li><fieldset>
+			<legend>Card Type</legend><ul style='list-style-type:none;'><li><input id=visa name=cardtype type=radio /><label for=visa>VISA</label></li><li>
+			<input id=amex name=cardtype type=radio /><label for=amex>AmEx</label></li><li>
+			<input id=mastercard name=cardtype type=radio /><label for=mastercard>Mastercard</label></li></ol></fieldset>
+			</li><li><label for=cardnumber>Card Number</label><input id=cardnumber name=cardnumber type=number required /></li>
+			<li><label for=secure>Security Code</label><input id=secure name=secure type=number required /></li><li>
+			<label for=namecard>Name on Card</label><input id=namecard name=namecard type=text placeholder='Exact name as on the card' required />
+			</li></ol></fieldset>";
+
+			$dummyPaymentArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+					<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
+					<input type="submit" name="payButtonPressed" class="btn" value="Pay Now"></form><br><br>
+					<button onclick="modalChanger(' . $reservation_id . ')" name="cancelPayment" class="btn btn-danger">Cancel Payment Process</button></div></div>';
+
 		}
 	}
 }
@@ -340,11 +361,10 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 mysqli_stmt_close($getPaySqlStmt);
 
 
-
 //Get any finished car's option to be rated
 $status = $startdate = $enddate = $ratingArea = "";
 $reservation_id = $owner = $renter = $rented_car_id = 0;
-$getPaySql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'paid' AND renter = " . $users_id;
+$getPaySql = "SELECT reservation_id, reservation_status, startdate, enddate, owner, renter, car_id FROM reservation WHERE reservation_status = 'paid' AND renter = " . $users_id;
 if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 	
 	// Attempt to execute the prepared statement
@@ -626,7 +646,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		
 		$reservation_id = trim($_POST["reservation_id"]);
 		// Prepare an update statement
-		$acceptReqSql = "UPDATE reservation SET status = 'accepted' WHERE reservation_id = " . $reservation_id;
+		$acceptReqSql = "UPDATE reservation SET reservation_status = 'accepted' WHERE reservation_id = " . $reservation_id;
 		
 		if($acceptReqSqlStmt = mysqli_prepare($link, $acceptReqSql)){
 			
@@ -648,7 +668,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	if(isset($_POST["declineRes"])){
 		$reservation_id = trim($_POST["reservation_id"]);
 		// Prepare an update statement
-		$declineReqSql = "UPDATE reservation SET status = 'declined' WHERE reservation_id = " . $reservation_id;
+		$declineReqSql = "UPDATE reservation SET reservation_status = 'declined' WHERE reservation_id = " . $reservation_id;
 		
 		if($declineReqSqlStmt = mysqli_prepare($link, $declineReqSql)){
 			
@@ -662,14 +682,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 		}
 		// Close statement
-		mysqli_stmt_close($declineReqSql);
+		mysqli_stmt_close($declineReqSqlStmt);
 	}
 	
+	
 	//for when user presses the pay button
-	if(isset($_POST["pay"])){
+	if(isset($_POST["payButtonPressed"])){
+		
+		
 		$reservation_id = trim($_POST["reservation_id"]);
 		// Prepare an update statement
-		$payReqSql = "UPDATE reservation SET status = 'paid' WHERE reservation_id = " . $reservation_id;
+		$payReqSql = "UPDATE reservation SET reservation_status = 'paid' WHERE reservation_id = " . $reservation_id;
 		
 		if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
 			
@@ -677,20 +700,35 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			if(mysqli_stmt_execute($payReqSqlStmt)){
 				/* store result */
 				mysqli_stmt_store_result($payReqSqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($payReqSqlStmt);
+		
+		$sql = "UPDATE payment SET payment_status = 'paid' WHERE reservation_id = " . $reservation_id;
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
 				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
 			} else{
 				echo "Oops! Something went wrong. Please try again later.";
 			}
 		}
 		// Close statement
-		mysqli_stmt_close($payReqSql);
+		mysqli_stmt_close($sqlStmt);
 	}
 	
 	//for when user presses the cancel payment button
 	if(isset($_POST["cancel"])){
 		$reservation_id = trim($_POST["reservation_id"]);
 		// Prepare an update statement
-		$cancelReqSql = "UPDATE reservation SET status = 'declined' WHERE reservation_id = " . $reservation_id;
+		$cancelReqSql = "UPDATE reservation SET reservation_status = 'declined' WHERE reservation_id = " . $reservation_id;
 		
 		if($cancelReqSqlStmt = mysqli_prepare($link, $cancelReqSql)){
 			
@@ -704,7 +742,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 		}
 		// Close statement
-		mysqli_stmt_close($cancelReqSql);
+		mysqli_stmt_close($cancelReqSqlStmt);
 	}
 	
 	//for when user presses the rate button
@@ -723,7 +761,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}else{
 			
 			// Prepare an update statement
-			$payReqSql = "UPDATE reservation SET status = 'done' WHERE reservation_id = " . $reservation_id;
+			$payReqSql = "UPDATE reservation SET reservation_status = 'done' WHERE reservation_id = " . $reservation_id;
 			
 			if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
 				
@@ -737,7 +775,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				}
 			}
 			// Close statement
-			mysqli_stmt_close($payReqSql);
+			mysqli_stmt_close($payReqSqlStmt);
 			
 			
 			//put the rating & review into the table
@@ -768,7 +806,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	if(isset($_POST["dismiss"])){
 		$reservation_id = trim($_POST["reservation_id"]);
 		// Prepare an update statement
-		$payReqSql = "UPDATE reservation SET status = 'done' WHERE reservation_id = " . $reservation_id;
+		$payReqSql = "UPDATE reservation SET reservation_status = 'done' WHERE reservation_id = " . $reservation_id;
 		
 		if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
 			
@@ -782,7 +820,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 		}
 		// Close statement
-		mysqli_stmt_close($payReqSql);
+		mysqli_stmt_close($payReqSqlStmt);
 	}
 	
 	
@@ -1083,10 +1121,35 @@ mysqli_close($link);
 		.starRating:not(:hover) > :checked ~ label:before{
 		  opacity : 1;
 		}
+		
+		
+		/*For the modal payment screen*/
+		
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed; /* Stay in place */
+			z-index: 1; /* Sit on top */
+			padding-top: 100px; /* Location of the box */
+			left: 0;
+			top: 0;
+			width: 100%; /* Full width */
+			height: 100%; /* Full height */
+			overflow: auto; /* Enable scroll if needed */
+			background-color: rgb(0,0,0); /* Fallback color */
+			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+		}
     </style>
 	<script>
 		function showChanger(type, car_id) {
 			var x = document.getElementById(type + car_id);
+			if (x.style.display === "none") {
+				x.style.display = "block";
+			} else {
+				x.style.display = "none";
+			}
+		}
+		function modalChanger(id) {
+			var x = document.getElementById("myModal" + id);
 			if (x.style.display === "none") {
 				x.style.display = "block";
 			} else {
@@ -1101,6 +1164,7 @@ mysqli_close($link);
     </div>
 	
 	<?php echo $suspendedArea; ?>
+	<?php echo $dummyPaymentArea; ?>
 	
 		<div style = "position: absolute; left: 10px;"  align = "right">
 			<p><?php echo $textArea; ?></p>
