@@ -75,11 +75,14 @@ if($stmt = mysqli_prepare($link, $sql)){
 			$startdate = strtotime($startdate);
 			$enddate = strtotime($enddate);
 			
+			if($enddate > strtotime(date("Y-m-d"))){
 			
 			$startdate = date('D d/m/Y', $startdate);
 			$enddate = date('D d/m/Y', $enddate);
 			
+			
 			$showBookedArea .= '<li>' . $startdate .' <b>until</b> ' . $enddate .'</li>';
+			}
 		}
 		$showBookedArea .= '</ul>';
 	}
@@ -166,7 +169,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			
 			$alreadyBooked = false;
 			
-			$sql = "SELECT startdate, enddate FROM reservation WHERE car_id = " . $car_id;
+			$sql = "SELECT startdate, enddate FROM reservation WHERE status NOT IN ('declined') AND car_id = " . $car_id;
 			if($stmt = mysqli_prepare($link, $sql)){
 
 				// Attempt to execute the prepared statement

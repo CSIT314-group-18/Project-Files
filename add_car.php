@@ -42,6 +42,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	if(isset($_POST["carSubmit"])){
 		
 		// Set parameters
+		$param_rego = trim($_POST['registration']);
 		$param_model = trim($_POST['model']);
 		$param_manufacturer = trim($_POST['manufacturer']);
 		$param_transmission = trim($_POST['transmission']);
@@ -51,13 +52,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Validate car
 		if(empty($_POST["carSubmit"]) || !is_numeric($param_odometer)){
 			$car_err = "Please enter a car.";
-		} else{
+		} else if(!preg_match("/[A-Z0-9]{6}$/", $param_rego)){
+			echo "That registration doesn't match any that are linked to your license.";
+		}else{	
 			// Prepare an insert statement
-			$sql = "INSERT INTO car (model, manufacturer, transmission, odometer, status, users_id) VALUES (?, ?, ?, ?, ?, ?)";
+			$sql = "INSERT INTO car (registration, model, manufacturer, transmission, odometer, status, users_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
 			
 			if($stmt = mysqli_prepare($link, $sql)){
 				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "sssisi", $param_model, $param_manufacturer, $param_transmission, $param_odometer, $status, $users_id);
+				mysqli_stmt_bind_param($stmt, "ssssisi", $param_rego, $param_model, $param_manufacturer, $param_transmission, $param_odometer, $status, $users_id);
 				
 				// Attempt to execute the prepared statement
 				if(mysqli_stmt_execute($stmt)){
@@ -91,7 +94,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			mysqli_stmt_close($stmt);
 		}
 		
-		if(isset($_FILES["fileToUpload"])){
+		
+		$photo_err = "";
+		
+		if(isset($_FILES["fileToUpload"]) || !empty($_FILES["fileToUpload"])){
 			//initialise photo uploading code
 			$target_dir = "car_image/";
 			
@@ -102,49 +108,66 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$this_car_id = 0;
 			$uploadOk = 1;
 			$imageFileType = strtolower(end($temp));
-			echo $newFileName;
 
 			//everything to do with uploading a file
 			$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
 			if($check !== false) {
-				echo "File is an image - " . $check["mime"] . ".";
 				$uploadOk = 1;
 			} else {
-				echo "File is not an image.";
+				$photo_err = "File is not an image.";
 				$uploadOk = 0;
 			}
 			
 			// Check if file already exists
 			if (file_exists($target_file)) {
-				echo "Sorry, file already exists.";
+				$photo_err = "Sorry, file already exists.";
 				$uploadOk = 0;
 			}
 			// Check file size
 			if ($_FILES["fileToUpload"]["size"] > 500000) {
-				echo "Sorry, your file is too large.";
+				$photo_err = "Sorry, your file is too large.";
 				$uploadOk = 0;
 			}
 			// Allow certain file formats
 			if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
 			&& $imageFileType != "gif" ) {
-				echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+				$photo_err = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
 				$uploadOk = 0;
 			}
 			// Check if $uploadOk is set to 0 by an error
 			if ($uploadOk == 0) {
-				echo "Sorry, your file was not uploaded.";
+				$photo_err = "Sorry, your file was not uploaded.";
 			// if everything is ok, try to upload file
 			} else {
 				if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
 					echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
 					header("location: welcome.php");
 				} else {
-					echo "Sorry, there was an error uploading your file.";
+					$photo_err = "Sorry, there was an error uploading your file.";
 				}
 			}
 		}else{
-			echo "Please choose a photo for your car.";
+			$photo_err = "Please choose a photo for your car.";
 		}
+		
+		if($uploadOk == 0){
+			// gif the photo wasn't uploaded, delete the car that was just made
+			$Gsql = "DELETE FROM car WHERE car_id = " . $this_car_id;
+				
+			if($Gstmt = mysqli_prepare($link, $Gsql)){
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($Gstmt)){
+					/* store result */
+					mysqli_stmt_store_result($Gstmt);
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($Gstmt);
+		}
+		echo $photo_err;
+		
 	}
 }	
 // Close connection
@@ -171,6 +194,7 @@ mysqli_close($link);
 			
 			<ul style='list-style-type:none; padding-left:35%; padding-right:35%;'>
 			<li><input type="file" class="form-control" name="fileToUpload" id="fileToUpload"></li>
+			<li><input type="text" name="registration"class="form-control" placeholder="registration" required></li>
 			<li><input type="text" name="model"class="form-control" placeholder="Model" required></li>
 			<li><select class="form-control" name="manufacturer" required>
 			  <option value="" disabled selected>Manufacturer</option>

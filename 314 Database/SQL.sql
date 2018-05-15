@@ -21,8 +21,8 @@ CREATE TABLE admins (
 
 CREATE TABLE car (
     car_id INT NOT NULL AUTO_INCREMENT,
-    image INT NOT NULL,
     model VARCHAR(50) NOT NULL,
+	registration VARCHAR(50) NOT NULL,
     manufacturer VARCHAR(50) NOT NULL,
     transmission VARCHAR(50) NOT NULL,
     odometer INT NOT NULL,

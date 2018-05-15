@@ -58,6 +58,40 @@ $msgOwnerArea = '<button class="btn btn-primary" onclick="showChanger(' . "'" . 
 <input type="submit" name="SendMsg" class="btn" value="Send"></form></div>';
 
 
+$ratingArea = $temp_review = "";
+$temp_rating = $rating_avg = $count = 0;;
+
+//fill out the reviews
+$sql = "SELECT review, rating FROM car_rating WHERE car_id = " . $car_id;
+if($sqlStmt = mysqli_prepare($link, $sql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($sqlStmt)){
+		
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($sqlStmt);
+		mysqli_stmt_bind_result($sqlStmt, $temp_review, $temp_rating);
+		
+		
+		//populate the html text field variable
+		$ratingArea = "<div style='overflow-y:scroll;'>";
+		while(mysqli_stmt_fetch($sqlStmt)){
+			$ratingArea .= '<p style="font-style:italic;">"' . $temp_review . '"</p>&nbsp;&nbsp;- ' . $temp_rating . '/5<br><br>';
+			$rating_avg += $temp_rating;
+			$count++;
+		}
+		$ratingArea .= "</div>";
+		
+		if($count > 0){
+			$rating_avg = ($rating_avg/$count);
+			$ratingArea = "<br><br><br><h3>This car as an average rating of " . $rating_avg . "/5 stars</h3><br><p>Some reviews are: </p><br>" . $ratingArea;
+		}
+	}
+}
+// Close statement
+mysqli_stmt_close($sqlStmt);
+
+
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
@@ -130,7 +164,11 @@ mysqli_close($link);
 	<p><a href="/request_conf.php" class="btn btn-primary">Request A Booking</a></p>
 	
 	<div style="position: absolute; right: 10px; top: 10px; border: 3px;">
-	<p><?php echo $msgOwnerArea; ?></p>
+		<p><?php echo $msgOwnerArea; ?></p>
+	
+		<div style="height:50%;">
+			<p><?php echo $ratingArea; ?></p>
+		</div>
 	</div>
 	
 	

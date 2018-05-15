@@ -250,8 +250,13 @@ if($getReservSqlStmt = mysqli_prepare($link, $getReservSql)){
 			// Close statement
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
+			$startdate = substr($startdate, 0, -8);
+			$enddate = substr($enddate, 0, -8);
+			$startdate = strtotime($startdate);
+			$enddate = strtotime($enddate);
 			
-			$incomingReserv .= $renter_name . " wants to rent your " . $car_name . " from <br>" . $startdate . " until " . $enddate;
+			
+			$incomingReserv .= $renter_name . " wants to rent your " . $car_name . " from <br>" . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate);
 			$incomingReserv .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="acceptRes" class="btn" value="Accept"></form>
@@ -316,8 +321,12 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			// Close statement
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
+			$startdate = substr($startdate, 0, -8);
+			$enddate = substr($enddate, 0, -8);
+			$startdate = strtotime($startdate);
+			$enddate = strtotime($enddate);
 			
-			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . $startdate . " until " . $enddate;
+			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate);
 			$incomingPay .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
 			<input type="submit" name="pay" class="btn" value="Pay Now"></form>
@@ -330,6 +339,97 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 // Close statement
 mysqli_stmt_close($getPaySqlStmt);
 
+
+
+//Get any finished car's option to be rated
+$status = $startdate = $enddate = $ratingArea = "";
+$reservation_id = $owner = $renter = $rented_car_id = 0;
+$getPaySql = "SELECT reservation_id, status, startdate, enddate, owner, renter, car_id FROM reservation WHERE status = 'paid' AND renter = " . $users_id;
+if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($getPaySqlStmt)){
+		
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($getPaySqlStmt);
+		mysqli_stmt_bind_result($getPaySqlStmt, $reservation_id, $status, $startdate, $enddate, $owner, $renter, $rented_car_id);
+
+		//populate the html text field variable
+		while(mysqli_stmt_fetch($getPaySqlStmt)){
+			
+			//get the name of the renter
+			$owner_name = "";
+			$getRenterSql = "SELECT username FROM users WHERE users_id = " . "'" . $owner . "'";
+			if($getRenterSqlStmt = mysqli_prepare($link, $getRenterSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getRenterSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getRenterSqlStmt);
+					mysqli_stmt_bind_result($getRenterSqlStmt, $owner_name);
+					mysqli_stmt_fetch($getRenterSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getRenterSqlStmt);
+			
+			//get the name of the renter
+			$car_name = "";
+			$getCarNameSql = "SELECT model FROM car WHERE users_id = " . "'" . $owner . "'";
+			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getCarNameSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getCarNameSqlStmt);
+					mysqli_stmt_bind_result($getCarNameSqlStmt, $car_name);
+					mysqli_stmt_fetch($getCarNameSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getCarNameSqlStmt);
+			
+			$startdate = substr($startdate, 0, -8);
+			$enddate = substr($enddate, 0, -8);
+			$startdate = strtotime($startdate);
+			$enddate = strtotime($enddate);
+			$today = strtotime(date("Y-m-d"));
+			
+			if($today > $enddate){
+				$ratingArea .= "You rented a " . $car_name . " from " . $owner_name . " recently, <br>from " . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate) .
+				"<br>Would you like to rate this car?";
+				$ratingArea .= '<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+				<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
+				<input type="hidden" name="this_car_id" value="' . $rented_car_id . '">
+				<p> 
+				<span class="starRating">
+				  <input id="rating5" type="radio" name="rating" value="5">
+				  <label for="rating5">5</label>
+				  <input id="rating4" type="radio" name="rating" value="4">
+				  <label for="rating4">4</label>
+				  <input id="rating3" type="radio" name="rating" value="3">
+				  <label for="rating3">3</label>
+				  <input id="rating2" type="radio" name="rating" value="2">
+				  <label for="rating2">2</label>
+				  <input id="rating1" type="radio" name="rating" value="1">
+				  <label for="rating1">1</label>
+				</span>
+				</p>
+				<p>Optional: </p>
+				<input type="text" name="review" class="form-control" placeholder="Review">
+				<input type="submit" name="rate" class="btn btn-primary" value="Rate"></form>
+				<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+				<input type="hidden" name="reservation_id" value="' . $reservation_id . '">
+				<input type="submit" name="dismiss" class="btn" value="Dismiss"></form><br><br>';
+			}
+			
+		}
+	}
+}
+// Close statement
+mysqli_stmt_close($getPaySqlStmt);
 
 
 
@@ -584,10 +684,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}
 		// Close statement
 		mysqli_stmt_close($payReqSql);
-		
-		
-		// Close statement
-		mysqli_stmt_close($payReqSql);
 	}
 	
 	//for when user presses the cancel payment button
@@ -610,6 +706,85 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($cancelReqSql);
 	}
+	
+	//for when user presses the rate button
+	if(isset($_POST["rate"])){
+		
+		//init. all variables
+		$reservation_id = trim($_POST["reservation_id"]);
+		$rating = trim($_POST["rating"]);
+		$review = trim($_POST["review"]);
+		$this_car_id = trim($_POST["this_car_id"]);
+		
+		if(strlen($review) > 255){
+			echo "That review is too long!";
+		}else if(empty($rating)){
+			echo "You need to put in a rating.";
+		}else{
+			
+			// Prepare an update statement
+			$payReqSql = "UPDATE reservation SET status = 'done' WHERE reservation_id = " . $reservation_id;
+			
+			if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($payReqSqlStmt)){
+					/* store result */
+					mysqli_stmt_store_result($payReqSqlStmt);
+					header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($payReqSql);
+			
+			
+			//put the rating & review into the table
+			$sql = "INSERT INTO car_rating (review, rating, car_id) VALUES (?, ?, ?)";
+				
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "sii", $review, $rating, $this_car_id);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					
+					mysqli_stmt_store_result($stmt);
+					
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($stmt);
+		}
+		
+	}
+	
+	
+	//for when user presses the dismiss rating button
+	if(isset($_POST["dismiss"])){
+		$reservation_id = trim($_POST["reservation_id"]);
+		// Prepare an update statement
+		$payReqSql = "UPDATE reservation SET status = 'done' WHERE reservation_id = " . $reservation_id;
+		
+		if($payReqSqlStmt = mysqli_prepare($link, $payReqSql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($payReqSqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($payReqSqlStmt);
+				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($payReqSql);
+	}
+	
 	
 	//if the user submitted a change of username
 	if(isset($_POST["unameChange"])){
@@ -868,6 +1043,46 @@ mysqli_close($link);
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
     <style type="text/css">
         body{ font: 14px sans-serif; text-align: center; }
+		
+		/* Everything concerned with the star rating*/
+		
+		.starRating:not(old){
+		  display        : inline-block;
+		  width          : 7.5em;
+		  height         : 1.5em;
+		  overflow       : hidden;
+		  vertical-align : bottom;
+		}
+
+		.starRating:not(old) > input{
+		  margin-right : -100%;
+		  opacity      : 0;
+		}
+
+		.starRating:not(old) > label{
+		  display         : block;
+		  float           : right;
+		  position        : relative;
+		  background      : url('star-off.svg');
+		  background-size : contain;
+		}
+
+		.starRating:not(old) > label:before{
+		  content         : '';
+		  display         : block;
+		  width           : 1.5em;
+		  height          : 1.5em;
+		  background      : url('star-on.svg');
+		  background-size : contain;
+		  opacity         : 0;
+		  transition      : opacity 0.2s linear;
+		}
+
+		.starRating:not(old) > label:hover:before,
+		.starRating:not(old) > label:hover ~ label:before,
+		.starRating:not(:hover) > :checked ~ label:before{
+		  opacity : 1;
+		}
     </style>
 	<script>
 		function showChanger(type, car_id) {
@@ -910,11 +1125,9 @@ mysqli_close($link);
 		<p><?php echo $incomingReserv; ?></p>
 		</div>
 		
-		<div align = "center">
-		<p><?php echo $incomingPay; ?></p>
-		</div>
-		
 		<div style="padding-left: 40%;padding-right: 40%;" align = "right">
+		<p><?php echo $incomingPay; ?></p>
+		<p><?php echo $ratingArea; ?></p>
 		<p><?php echo $userAccountArea; ?></p>
 		</div>
 		
