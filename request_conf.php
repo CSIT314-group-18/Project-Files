@@ -14,7 +14,7 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 }
 
 //get the car that they clicked
-$textArea = $model = $manufacturer = $transmission = $odometer = "";
+$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = "";
 $getCarSql = "SELECT car_id, image, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
@@ -39,8 +39,46 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 				$prelimPhotoArea = "";
 			}
 			
+			
+			// Prepare an select statement to get the location id of the user who owns this car
+			$sql = "SELECT location_id FROM users WHERE users_id = ?";
+			
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "i", $car_owner_users_id);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					mysqli_stmt_store_result($stmt);
+					mysqli_stmt_bind_result($stmt, $temp_location_id);
+					mysqli_stmt_fetch($stmt);
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($stmt);
+			
+			$getLocSql = "SELECT street, suburb, postcode, city, country FROM location WHERE location_id = " . $temp_location_id;
+			if($getLocSqlStmt = mysqli_prepare($link, $getLocSql)){
+	
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getLocSqlStmt)){
+			
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getLocSqlStmt);
+					mysqli_stmt_bind_result($getLocSqlStmt, $street, $suburb, $postcode, $city, $country);
+					$addressArea = $street . ", " . $suburb . ", " . $postcode . ", " . $city . ", " . $country;
+					mysqli_stmt_fetch($getLocSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getLocSqlStmt);
+			
+			
 			$textArea .= "<div class='page-header'>
-			<h1>" . $model . "</h1></div>
+			<h1>" . $model . "</h1><h2>This car will be picked up and dropped off from " . $addressArea . "</h2></div>
 			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
 			<li>" . $odometer . '</li></ul>';
 		}

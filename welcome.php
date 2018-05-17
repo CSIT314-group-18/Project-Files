@@ -273,7 +273,7 @@ mysqli_stmt_close($getReservSqlStmt);
 
 //Get any payments this user is required to do
 $status = $startdate = $enddate = $incomingPay = "";
-$reservation_id = $owner = $renter = $rented_car_id = 0;
+$reservation_id = $owner = $renter = $rented_car_id = $this_fee = 0;
 $getPaySql = "SELECT reservation_id, reservation_status, startdate, enddate, owner, renter, car_id FROM reservation WHERE reservation_status = 'accepted' AND renter = " . $users_id;
 if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 	
@@ -321,13 +321,29 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			// Close statement
 			mysqli_stmt_close($getCarNameSqlStmt);
 			
+			//get the amount they have to pay
+			$getCarNameSql = "SELECT total_fee FROM payment WHERE reservation_id = " . $reservation_id;
+			if($getCarNameSqlStmt = mysqli_prepare($link, $getCarNameSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getCarNameSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getCarNameSqlStmt);
+					mysqli_stmt_bind_result($getCarNameSqlStmt, $this_fee);
+					mysqli_stmt_fetch($getCarNameSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getCarNameSqlStmt);
+			
 			$startdate = substr($startdate, 0, -8);
 			$enddate = substr($enddate, 0, -8);
 			$startdate = strtotime($startdate);
 			$enddate = strtotime($enddate);
 			
 			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate);
-			$incomingPay .= '<br>
+			$incomingPay .= '<br>You are required to pay $' . $this_fee . '<br>(you are liable to pay any damages to your rental if they occur)
 			<button onclick="modalChanger(' . $reservation_id . ')" name="pay" class="btn btn-primary">Open Payment Options</button>
 		
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
@@ -338,7 +354,7 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			
 			$dummyPaymentArea .= '<div id="myModal' . $reservation_id . '" class="modal" style="display:none;"><div class="modal-content">';
 		
-			$dummyPaymentArea .= "<fieldset><legend>Card Details</legend><ul style='list-style-type:none;'><li>
+			$dummyPaymentArea .= "<fieldset><legend>" . $this_fee . "</legend><legend>Card Details</legend><ul style='list-style-type:none;'><li>
 			<li>Paypal: <button>LOGIN</button><br><br><br>Or</li>
 			<li><fieldset>
 			<legend>Card Type</legend><ul style='list-style-type:none;'><li><input id=visa name=cardtype type=radio /><label for=visa>VISA</label></li><li>

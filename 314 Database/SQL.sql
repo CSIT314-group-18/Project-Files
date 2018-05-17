@@ -8,8 +8,10 @@ CREATE TABLE users (
 	account_suspended INT NOT NULL,
     verifed INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	facebook VARCHAR(255),
     location_id INT NOT NULL,
+	facebook VARCHAR(255),
+	cc_info VARCHAR(255),
+	balance DOUBLE,
 	PRIMARY KEY (users_id)
 );
 
@@ -51,11 +53,12 @@ CREATE TABLE car_rating (
 
 CREATE TABLE location (
     location_id INT NOT NULL AUTO_INCREMENT,
-    address VARCHAR(255) NOT NULL,
+    street VARCHAR(255) NOT NULL,
     suburb VARCHAR(50) NOT NULL,
     postcode VARCHAR(50) NOT NULL,
     city VARCHAR(50) NOT NULL,
     country VARCHAR(50) NOT NULL,
+    users_id INT NOT NULL,
 	PRIMARY KEY (location_id)
 );
 

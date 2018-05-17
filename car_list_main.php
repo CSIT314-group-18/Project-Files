@@ -234,11 +234,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$_SESSION['this_car_id'] = $this_car_id;   
 		header("location: /request_conf.php");
 	}
-	}	
+}	
 
 //get all the cars
-$textArea = $car_id = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer FROM car WHERE status = 'listed' AND" . $userSearchString;
+$textArea = $model = $manufacturer = $transmission = $street = $suburb = $postcode = $city = $country = "";
+$car_id = $temp_users_id = $temp_location_id = $odometer = 0;
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, users_id FROM car WHERE status = 'listed' AND" . $userSearchString;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -246,7 +247,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $temp_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -262,7 +263,44 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 				$prelimPhotoArea = "";
 			}
 			
-			$textArea .= "<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
+			
+			// Prepare an select statement to get the location id of the user who owns this car
+			$sql = "SELECT location_id FROM users WHERE users_id = ?";
+			
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "i", $temp_users_id);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					mysqli_stmt_store_result($stmt);
+					mysqli_stmt_bind_result($stmt, $temp_location_id);
+					mysqli_stmt_fetch($stmt);
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($stmt);
+			
+			$getLocSql = "SELECT street, suburb, postcode, city, country FROM location WHERE location_id = " . $temp_location_id;
+			if($getLocSqlStmt = mysqli_prepare($link, $getLocSql)){
+	
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getLocSqlStmt)){
+			
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getLocSqlStmt);
+					mysqli_stmt_bind_result($getLocSqlStmt, $street, $suburb, $postcode, $city, $country);
+					mysqli_stmt_fetch($getLocSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getLocSqlStmt);
+			
+			$textArea .= "<div class='carArea'><ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $street . ", " . $suburb . 
+			", " . $postcode . ", " . $city . ", " . $country . "<br><br></li><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>" . $odometer . '<br>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
@@ -270,7 +308,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			$textArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="requestBooking" class="btn" value="Request This Car">
-			</form><br><br><hr>';
+			</form></div><br><br><hr>';
 		}
 		$textArea .= "<br><br>";
 	}
@@ -290,6 +328,12 @@ mysqli_close($link);
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
     <style type="text/css">
         body{ font: 14px sans-serif; text-align: center; }
+		.carArea{
+			border: 2px solid lightgrey;
+			margin-left:40%;
+			margin-right:40%;
+			padding: 10px;
+		}
     </style>
 </head>
 <body>
