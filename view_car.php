@@ -15,7 +15,7 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 
 //get the car that they clicked
 $addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, image, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -23,7 +23,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $image, $model, $manufacturer, $transmission, $odometer, $owner_users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $owner_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -69,15 +69,15 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 					// Store result, print it to the variable
 					mysqli_stmt_store_result($getLocSqlStmt);
 					mysqli_stmt_bind_result($getLocSqlStmt, $street, $suburb, $postcode, $city, $country);
-					$addressArea = $street . ", " . $suburb . ", " . $postcode . ", " . $city . ", " . $country;
 					mysqli_stmt_fetch($getLocSqlStmt);
+					$addressArea = $street . ", " . $suburb . ", " . $postcode . ", " . $city . ", " . $country;
 				}
 			}
 			// Close statement
 			mysqli_stmt_close($getLocSqlStmt);
 			
 			$textArea .= "<div class='page-header'>
-			<h1>" . $model . "</h1><h2>This car will be picked up and dropped off from " . $addressArea . "</h2></div>
+			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4></div>
 			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
 			<li>" . $odometer . '</li></ul>';
 		}

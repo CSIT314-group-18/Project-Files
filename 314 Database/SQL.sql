@@ -11,7 +11,7 @@ CREATE TABLE users (
     location_id INT NOT NULL,
 	facebook VARCHAR(255),
 	cc_info VARCHAR(255),
-	balance DOUBLE,
+	balance DOUBLE NOT NULL,
 	PRIMARY KEY (users_id)
 );
 

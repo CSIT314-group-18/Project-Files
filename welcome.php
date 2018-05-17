@@ -119,9 +119,9 @@ mysqli_stmt_close($getCarSqlStmt);
 
 
 //get the parts of the users account, ready to change
-$userAccountArea = $username = $facebook = $street = $suburb = $postcode = $city = $country = "";
-$location_id = 0;
-$getuserInfoSql = "SELECT facebook, location_id FROM users WHERE users_id = " . $users_id;
+$userAccountArea = $username = $fname = $lname = $facebook = $street = $suburb = $postcode = $city = $country = "";
+$location_id = $balance =  0;
+$getuserInfoSql = "SELECT fname, lname, facebook, location_id, balance FROM users WHERE users_id = " . $users_id;
 if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 	
 	// Attempt to execute the prepared statement
@@ -129,7 +129,7 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getuserInfoSqlStmt);
-		mysqli_stmt_bind_result($getuserInfoSqlStmt, $facebook, $location_id);
+		mysqli_stmt_bind_result($getuserInfoSqlStmt, $fname, $lname, $facebook, $location_id, $balance);
 		if(mysqli_stmt_num_rows($getuserInfoSqlStmt) != 1){
                     $userAccountArea = "Error, your info wasn't retrievable.";
 		}
@@ -154,7 +154,8 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 				mysqli_stmt_close($getLocSqlStmt);
 			}
 			
-			$userAccountArea .= "<ul style='list-style-type:none'><li>" . htmlspecialchars($_SESSION["username"]) . 
+			$userAccountArea .= "<h3>" . $fname . " " . $lname . "</h3><ul style='list-style-type:none'><li style='border: 2px solid grey;'>Your Balance is $" . $balance . "<br></li>
+			<li>" . htmlspecialchars($_SESSION["username"]) . 
 			'&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'unameChange'," . $users_id . ')">Change Username</button>
 			<div id="unameChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="text" name="newUname" class="form-control">
@@ -190,6 +191,97 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 // Close statement
 mysqli_stmt_close($getuserInfoSqlStmt);
 
+$userAccountArea .= '<button class="btn btn-primary" onclick="showChanger(' . "'showTransLog'," . $users_id . ')">Show Your Transaction Log</button>';
+
+
+//get the transactions that this account has done
+$temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = 0;
+$temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = "";
+$sql = "SELECT owner, renter, total_fee, reservation_id FROM payment WHERE owner = " . $users_id . " OR renter = " . $users_id . " ORDER BY payment_id DESC";
+
+if($sqlStmt = mysqli_prepare($link, $sql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($sqlStmt)){
+		/* store result */
+		mysqli_stmt_store_result($sqlStmt);
+		mysqli_stmt_bind_result($sqlStmt, $temp_owner, $temp_renter, $temp_fee, $temp_reservation_id);
+		$userAccountArea .= '<div id="showTransLog' . $users_id . '" style="display:none;overflow-y:scroll;bottom-margin:20;"><ul style="list-style-type:none">';
+		while(mysqli_stmt_fetch($sqlStmt)){
+			
+			//get the dates that each transaction happened
+			$getRenteeSql = "SELECT startdate, enddate FROM reservation WHERE reservation_id = " . $temp_reservation_id;
+			if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getRenteeSqlStmt);
+					mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_startdate, $temp_enddate);
+					mysqli_stmt_fetch($getRenteeSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getRenteeSqlStmt);
+			
+			//convert the dates into something readable
+			$temp_startdate = substr($temp_startdate, 0, -8);
+			$temp_enddate = substr($temp_enddate, 0, -8);
+			$temp_startdate = strtotime($temp_startdate);
+			$temp_enddate = strtotime($temp_enddate);
+			
+			if($temp_owner == $users_id){
+				
+				//get the person who's not you
+				$getRenteeSql = "SELECT username FROM users WHERE users_id = " . $temp_renter;
+				if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+				
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getRenteeSqlStmt);
+						mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_rentername);
+						mysqli_stmt_fetch($getRenteeSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getRenteeSqlStmt);
+				
+				$userAccountArea .= '<li>Got paid $' . $temp_fee . ' by ' . $temp_rentername . ' for the rental dates of '
+				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li>';
+				
+			} else if($temp_renter == $users_id){
+				
+				//get the person who's not you
+				$getRenteeSql = "SELECT username FROM users WHERE users_id = " . $temp_owner;
+				if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+				
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getRenteeSqlStmt);
+						mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_ownername);
+						mysqli_stmt_fetch($getRenteeSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getRenteeSqlStmt);
+				
+				$userAccountArea .= '<li>You Paid ' . $temp_ownername . ' $' . $temp_fee . ' for the rental dates of '
+				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li>';
+			}
+			
+		}
+		$userAccountArea .= '</ul></div>';
+	} else{
+		echo "Oops! Something went wrong. Please try again later.";
+	}
+}
+// Close statement
+mysqli_stmt_close($sqlStmt);
 
 
 //it's easier to define here the button that let's your delete your account
@@ -343,7 +435,7 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			$enddate = strtotime($enddate);
 			
 			$incomingPay .= $owner_name . " accepted your request to rent their " . $car_name . " from <br>" . date('D d/m/Y', $startdate) . " until " . date('D d/m/Y', $enddate);
-			$incomingPay .= '<br>You are required to pay $' . $this_fee . '<br>(you are liable to pay any damages to your rental if they occur)
+			$incomingPay .= '<br>You are required to pay $' . $this_fee . '<br>(you are liable to pay any damages to your rental if they occur)<br>
 			<button onclick="modalChanger(' . $reservation_id . ')" name="pay" class="btn btn-primary">Open Payment Options</button>
 		
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
@@ -354,7 +446,7 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			
 			$dummyPaymentArea .= '<div id="myModal' . $reservation_id . '" class="modal" style="display:none;"><div class="modal-content">';
 		
-			$dummyPaymentArea .= "<fieldset><legend>" . $this_fee . "</legend><legend>Card Details</legend><ul style='list-style-type:none;'><li>
+			$dummyPaymentArea .= "<fieldset><legend>$" . $this_fee . "</legend><legend>Card Details</legend><ul style='list-style-type:none;'><li>
 			<li>Paypal: <button>LOGIN</button><br><br><br>Or</li>
 			<li><fieldset>
 			<legend>Card Type</legend><ul style='list-style-type:none;'><li><input id=visa name=cardtype type=radio /><label for=visa>VISA</label></li><li>
@@ -706,7 +798,105 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	if(isset($_POST["payButtonPressed"])){
 		
 		
+		//update the reservation and payment tables showing the payment has been made
 		$reservation_id = trim($_POST["reservation_id"]);
+		
+		//get the ids and amount to put them in next
+		$temp_owner = $temp_renter = $temp_fee = $temp_owner_balance = $temp_renter_balance = 0;
+		$sql = "SELECT owner, renter, total_fee FROM payment WHERE reservation_id = " . $reservation_id;
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+				mysqli_stmt_bind_result($sqlStmt, $temp_owner, $temp_renter, $temp_fee);
+				mysqli_stmt_fetch($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		//get the already existing balance from the owner, to update it
+		$sql = "SELECT balance FROM users WHERE users_id = " . $temp_owner;
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+				mysqli_stmt_bind_result($sqlStmt, $temp_owner_balance);
+				mysqli_stmt_fetch($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		$temp_owner_balance = $temp_owner_balance + $temp_fee;
+		
+		//set the balance of the owner that much more
+		$sql = "UPDATE users SET balance = ? WHERE users_id = " . $temp_owner;
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			mysqli_stmt_bind_param($sqlStmt, "d", $temp_owner_balance);
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+				
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		//get the already existing balance from the RENTER, to update it
+		$sql = "SELECT balance FROM users WHERE users_id = " . $temp_renter;
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+				mysqli_stmt_bind_result($sqlStmt, $temp_renter_balance);
+				mysqli_stmt_fetch($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		$temp_renter_balance = $temp_renter_balance - $temp_fee;
+		
+		//set the balance of the RENTER that much more
+		$sql = "UPDATE users SET balance = ? WHERE users_id = " . $temp_renter;
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			mysqli_stmt_bind_param($sqlStmt, "d", $temp_renter_balance);
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+				
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+				
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		
 		// Prepare an update statement
 		$payReqSql = "UPDATE reservation SET reservation_status = 'paid' WHERE reservation_id = " . $reservation_id;
 		
@@ -738,6 +928,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
+		
+		
 	}
 	
 	//for when user presses the cancel payment button
