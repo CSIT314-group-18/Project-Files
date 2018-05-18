@@ -44,3 +44,7 @@ ON DELETE CASCADE;
 ALTER TABLE message
 ADD FOREIGN KEY (sentto) REFERENCES users(users_id)
 ON DELETE CASCADE;
+
+INSERT INTO location (location_id, street, suburb, postcode, city, country, users_id) VALUES  (1, "", "", "", "", "", 1);
+INSERT INTO users (users_id, username, password, fname, lname, license_number, location_id) VALUES (1, "root", "$2y$10$sKfiEapIjE/sJZtQjUHfoOv2Rn1x5sTBN5NgBeKbhwmVSu7gWSka2", "system", "@ root", "", 1);
+INSERT INTO admins (users_id) VALUES (1);

@@ -61,52 +61,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		
 		
 		
-		// Validate car
-		if(empty($_POST["carSubmit"]) || !is_numeric($param_odometer)){
-			$car_err = "Please enter a car.";
-		} else if(!preg_match("/[A-Z0-9]{6}$/", $param_rego)){
-			echo "That registration doesn't match any that are linked to your license.";
-		}else{	
-			// Prepare an insert statement
-			$sql = "INSERT INTO car (registration, model, manufacturer, transmission, colour, engine_type, drive_layout, body_type, seats, doors, year, odometer, status, days_na, users_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			echo $sql;
-			if($stmt = mysqli_prepare($link, $sql)){
-				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "ssssssssiiiissi", $param_rego, $param_model, $param_manufacturer, $param_transmission, $param_colour, $param_engine_type, $param_drive_layout, $param_body_type, $param_seats, $param_doors, $param_year, $param_odometer, $status, $days_na, $users_id);
-				
-				// Attempt to execute the prepared statement
-				if(mysqli_stmt_execute($stmt)){
-					/* store result */
-					
-					// get the car id of the car we just put in
-					$Gsql = "SELECT MAX(car_id) FROM car";
-						
-					if($Gstmt = mysqli_prepare($link, $Gsql)){
-						// Attempt to execute the prepared statement
-						if(mysqli_stmt_execute($Gstmt)){
-							/* store result */
-							mysqli_stmt_store_result($Gstmt);
-							mysqli_stmt_bind_result($Gstmt, $this_car_id);
-							mysqli_stmt_fetch($Gstmt);
-						} else{
-							echo "Oops! Something went wrong. Please try again later.";
-						}
-					}
-					// Close statement
-					mysqli_stmt_close($Gstmt);
-					
-					
-					mysqli_stmt_store_result($stmt);
-					
-				} else{
-					echo "Oops! Something went wrong. Please try again later.";
-				}
-			}
-			// Close statement
-			mysqli_stmt_close($stmt);
-		}
-		
-		
 		$photo_err = "";
 		
 		if(isset($_FILES["fileToUpload"]) || !empty($_FILES["fileToUpload"])){
@@ -136,7 +90,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				$uploadOk = 0;
 			}
 			// Check file size
-			if ($_FILES["fileToUpload"]["size"] > 500000) {
+			if ($_FILES["fileToUpload"]["size"] > 600000) {
 				$photo_err = "Sorry, your file is too large.";
 				$uploadOk = 0;
 			}
@@ -179,6 +133,55 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			mysqli_stmt_close($Gstmt);
 		}
 		echo $photo_err;
+		
+		
+		if($photo_err == ""){
+			// Validate car
+			if(empty($_POST["carSubmit"]) || !is_numeric($param_odometer)){
+				$car_err = "Please enter a car.";
+			} else if(!preg_match("/[A-Z0-9]{6}$/", $param_rego)){
+				echo "That registration doesn't match any that are linked to your license.";
+			}else{	
+				// Prepare an insert statement
+				$sql = "INSERT INTO car (registration, model, manufacturer, transmission, colour, engine_type, drive_layout, body_type, seats, doors, year, odometer, status, days_na, users_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				if($stmt = mysqli_prepare($link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "ssssssssiiiissi", $param_rego, $param_model, $param_manufacturer, $param_transmission, $param_colour, $param_engine_type, $param_drive_layout, $param_body_type, $param_seats, $param_doors, $param_year, $param_odometer, $status, $days_na, $users_id);
+					
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($stmt)){
+						/* store result */
+						
+						// get the car id of the car we just put in
+						$Gsql = "SELECT MAX(car_id) FROM car";
+							
+						if($Gstmt = mysqli_prepare($link, $Gsql)){
+							// Attempt to execute the prepared statement
+							if(mysqli_stmt_execute($Gstmt)){
+								/* store result */
+								mysqli_stmt_store_result($Gstmt);
+								mysqli_stmt_bind_result($Gstmt, $this_car_id);
+								mysqli_stmt_fetch($Gstmt);
+							} else{
+								echo "Oops! Something went wrong. Please try again later.";
+							}
+						}
+						// Close statement
+						mysqli_stmt_close($Gstmt);
+						
+						
+						mysqli_stmt_store_result($stmt);
+						
+					} else{
+						echo "Oops! Something went wrong. Please try again later.";
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($stmt);
+			}
+		}
+		
+		
 		
 	}
 }	

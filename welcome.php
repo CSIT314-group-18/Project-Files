@@ -11,6 +11,11 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
   exit;
 }
 
+
+//define how much the system takes per transaction
+$system_commission = 30.0;
+
+
 //get the verified variable and the user id from this user, to see if they need to be
 $verified = $users_id = $location_id = $account_suspended = 0;
 $divArea = $dummyPaymentArea = "";
@@ -140,7 +145,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 						mysqli_stmt_close($getRenteeSqlStmt);
 						
 						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
-						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b></li><br>';
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system commission)</li><br>';
 
 					}
 					
@@ -351,6 +356,8 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 				}
 				// Close statement
 				mysqli_stmt_close($getRenteeSqlStmt);
+				
+				$temp_fee = $temp_fee - $system_commission;
 				
 				$userAccountArea .= '<li>Recieved $' . $temp_fee . ' from ' . $temp_rentername . ' for the rental dates of '
 				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li><br>';
@@ -963,7 +970,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	//for when user presses the pay button
 	if(isset($_POST["payButtonPressed"])){
 		
-		
 		//update the reservation and payment tables showing the payment has been made
 		$reservation_id = trim($_POST["reservation_id"]);
 		
@@ -1004,7 +1010,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
 		
-		$temp_owner_balance = $temp_owner_balance + $temp_fee;
+		$temp_owner_balance = ($temp_owner_balance + $temp_fee) - $system_commission;
 		
 		//set the balance of the owner that much more
 		$sql = "UPDATE users SET balance = ? WHERE users_id = " . $temp_owner;
@@ -1022,6 +1028,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
+		
 		
 		//get the already existing balance from the RENTER, to update it
 		$sql = "SELECT balance FROM users WHERE users_id = " . $temp_renter;
@@ -1061,6 +1068,48 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
+		
+		//initialise
+		$system_balance = 0;
+		
+		//get the already existing balance from the system, to update it
+		$sql = "SELECT balance FROM users WHERE users_id = 1";
+		
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+				mysqli_stmt_bind_result($sqlStmt, $system_balance);
+				mysqli_stmt_fetch($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		$system_balance = $system_balance + $system_commission;
+		
+		//set the balance of the owner that much more
+		$sql = "UPDATE users SET balance = ? WHERE users_id = 1";
+		if($sqlStmt = mysqli_prepare($link, $sql)){
+			
+			mysqli_stmt_bind_param($sqlStmt, "d", $system_balance);
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($sqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($sqlStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+				
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($sqlStmt);
+		
+		
 		
 		
 		// Prepare an update statement
