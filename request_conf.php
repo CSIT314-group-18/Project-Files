@@ -322,11 +322,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				$status = "not paid";
 				
 				// Prepare an insert statement to payment
-				$sql = "INSERT INTO payment (payment_status, total_fee, owner, renter, reservation_id) VALUES (?, ?, ?, ?, ?)";
+				$sql = "INSERT INTO payment (payment_status, total_fee, owner, renter, car_id, reservation_id) VALUES (?, ?, ?, ?, ?, ?)";
 
 				if($stmt = mysqli_prepare($link, $sql)){
 					// Bind variables to the prepared statement as parameters
-					mysqli_stmt_bind_param($stmt, "sdiii", $status, $amount, $car_owner_users_id, $_SESSION['users_id'], $temp_res_id);
+					mysqli_stmt_bind_param($stmt, "sdiiii", $status, $amount, $car_owner_users_id, $_SESSION['users_id'], $car_id, $temp_res_id);
 					
 					// Attempt to execute the prepared statement
 					if(mysqli_stmt_execute($stmt)){

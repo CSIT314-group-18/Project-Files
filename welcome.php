@@ -87,6 +87,73 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			}
 			
 			
+			//get the transactions that this car has done
+			$temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = 0;
+			$temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = $carTransLog = "";
+			$sql = "SELECT owner, renter, total_fee, reservation_id FROM payment WHERE (payment_status = 'paid' AND car_id = " . $car_id . ") ORDER BY payment_id DESC";
+			if($sqlStmt = mysqli_prepare($link, $sql)){
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($sqlStmt)){
+					/* store result */
+					mysqli_stmt_store_result($sqlStmt);
+					mysqli_stmt_bind_result($sqlStmt, $temp_owner, $temp_renter, $temp_fee, $temp_reservation_id);
+					while(mysqli_stmt_fetch($sqlStmt)){
+						
+						//get the dates that each transaction happened
+						$getRenteeSql = "SELECT startdate, enddate FROM reservation WHERE reservation_id = " . $temp_reservation_id;
+						if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+						
+							// Attempt to execute the prepared statement
+							if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+								// Store result, print it to the variable
+								mysqli_stmt_store_result($getRenteeSqlStmt);
+								mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_startdate, $temp_enddate);
+								mysqli_stmt_fetch($getRenteeSqlStmt);
+							}
+						}
+						// Close statement
+						mysqli_stmt_close($getRenteeSqlStmt);
+						
+						//convert the dates into something readable
+						$temp_startdate = substr($temp_startdate, 0, -8);
+						$temp_enddate = substr($temp_enddate, 0, -8);
+						$temp_startdate = strtotime($temp_startdate);
+						$temp_enddate = strtotime($temp_enddate);
+						
+
+						//get the person who's not you
+						$getRenteeSql = "SELECT username FROM users WHERE users_id = " . $temp_renter;
+						if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+						
+							// Attempt to execute the prepared statement
+							if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+								// Store result, print it to the variable
+								mysqli_stmt_store_result($getRenteeSqlStmt);
+								mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_rentername);
+								mysqli_stmt_fetch($getRenteeSqlStmt);
+							}
+						}
+						// Close statement
+						mysqli_stmt_close($getRenteeSqlStmt);
+						
+						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b></li><br>';
+
+					}
+					
+					if(empty($carTransLog)) $carTransLog = "This car hasn't had any<br> transactions yet.";
+					
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($sqlStmt);
+			
+			
 			$textArea .= "<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li>
 			<li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
@@ -100,12 +167,12 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="status" class="form-control" value= "' . $status . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="statusChange" class="btn btn-primary" value="Change status"></form></div></li>
+			<input type="submit" name="statusChange" class="btn" value="Change status"></form></div></li>
 			
 			<li><button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
 			<div id="photoChange' . $car_id . '" style="display:none">
 			<form enctype="multipart/form-data" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="file" class="form-control" name="' . $car_id . '">
+			<input type="file" style="width:200px;" class="form-control" name="' . $car_id . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div></li>
 			
@@ -115,6 +182,12 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			' . $tempCheckBoxArea . '
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="days_na" class="btn" value="Change Available Days"></form></div></li>
+			
+			<li><button class="btn" onclick="showChanger(' . "'showCarTrans'," . $car_id . ')">Show Car<br>Transaction Log</button>
+			<div id="showCarTrans' . $car_id . '" style="display:none;overflow-y:scroll;bottom-margin:20;">
+			<ol style="list-style-type:none">
+			' . $carTransLog . '</ol></div></li>
+			
 			</ul>';
 			$textArea .= '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . $car_id . ')">Remove Car From Our Site</button>
 			<div id="deleter' . $car_id . '" style="display:none">
@@ -227,7 +300,7 @@ $userAccountArea .= '<button class="btn btn-primary" onclick="showChanger(' . "'
 //get the transactions that this account has done
 $temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = 0;
 $temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = "";
-$sql = "SELECT owner, renter, total_fee, reservation_id FROM payment WHERE owner = " . $users_id . " OR renter = " . $users_id . " ORDER BY payment_id DESC";
+$sql = "SELECT owner, renter, total_fee, reservation_id FROM payment WHERE payment_status = 'paid' AND (owner = " . $users_id . " OR renter = " . $users_id . ") ORDER BY payment_id DESC";
 
 if($sqlStmt = mysqli_prepare($link, $sql)){
 	
@@ -279,8 +352,8 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 				// Close statement
 				mysqli_stmt_close($getRenteeSqlStmt);
 				
-				$userAccountArea .= '<li>Got paid $' . $temp_fee . ' by ' . $temp_rentername . ' for the rental dates of '
-				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li>';
+				$userAccountArea .= '<li>Recieved $' . $temp_fee . ' from ' . $temp_rentername . ' for the rental dates of '
+				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li><br>';
 				
 			} else if($temp_renter == $users_id){
 				
@@ -300,8 +373,8 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 				// Close statement
 				mysqli_stmt_close($getRenteeSqlStmt);
 				
-				$userAccountArea .= '<li>You Paid ' . $temp_ownername . ' $' . $temp_fee . ' for the rental dates of '
-				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li>';
+				$userAccountArea .= '<li>Paid ' . $temp_ownername . ' $' . $temp_fee . ' for the rental dates of '
+				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li><br>';
 			}
 			
 		}
