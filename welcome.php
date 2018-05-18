@@ -50,9 +50,9 @@ if($account_suspended == 1)$suspendedArea = " <p>You are suspended. Appeal to an
 else $suspendedArea = "<div>";
 
 //get all the cars a user has ready
-$textArea = $model = $manufacturer = $transmission = $status = "";
+$textArea = $model = $manufacturer = $transmission = $status = $days_na = "";
 $car_id = $odometer = 0;
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, status FROM car WHERE users_id = " . $users_id;
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, status, days_na FROM car WHERE users_id = " . $users_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -60,7 +60,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $status);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $status, $days_na);
 		if(mysqli_stmt_num_rows($getCarSqlStmt) != 0){
                     $textArea = "<label>Your current cars:</label>";
 		}
@@ -76,6 +76,14 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 				$prelimPhotoArea = "<img src='" . current($target_file) . "' alt='" . $car_id . "' style='width:200px;'>";
 			}else{
 				$prelimPhotoArea = "";
+			}
+			
+			//parse the days variable into something checkbox-able
+			$days_array = explode(",", $days_na);
+			$tempCheckBoxArea = "";
+			foreach ($days_array as $day){
+				$info_array = explode("-", $day);
+				$tempCheckBoxArea .= '<input type="checkbox" name="' . $info_array[0] . '" ' . $info_array[1] . '>' . $info_array[0] . "<br>";
 			}
 			
 			
@@ -94,12 +102,19 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="statusChange" class="btn btn-primary" value="Change status"></form></div></li>
 			
-			<button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
+			<li><button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
 			<div id="photoChange' . $car_id . '" style="display:none">
 			<form enctype="multipart/form-data" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="file" class="form-control" name="' . $car_id . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div>
+			<input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div></li>
+			
+			<li><button class="btn btn-primary" onclick="showChanger(' . "'days_na'," . $car_id . ')">Change Days <br>Your Car is Available</button>
+			<div id="days_na' . $car_id . '" style="display:none">
+			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			' . $tempCheckBoxArea . '
+			<input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<input type="submit" name="days_na" class="btn" value="Change Available Days"></form></div></li>
 			</ul>';
 			$textArea .= '<button class="btn btn-danger" onclick="showChanger(' . "'deleter'," . $car_id . ')">Remove Car From Our Site</button>
 			<div id="deleter' . $car_id . '" style="display:none">
@@ -670,7 +685,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 			
 			// Check file size
-			if ($_FILES[$this_car_id]["size"] > 500000) {
+			if ($_FILES[$this_car_id]["size"] > 600000) {
 				echo "Sorry, your file is too large.";
 				$uploadOk = 0;
 			}
@@ -697,7 +712,70 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}
 	}
 	
-	
+	//for when they want to change the days of the week their car is available
+	if(isset($_POST["days_na"])){
+		
+		$this_car_id = trim($_POST["this_car_id"]);
+		
+		if(isset($_POST["Monday"]))$Monday = trim($_POST["Monday"]);
+		else $Monday = "";
+		if(isset($_POST["Tuesday"]))$Tuesday = trim($_POST["Tuesday"]);
+		else $Tuesday = "";
+		if(isset($_POST["Wednesday"]))$Wednesday = trim($_POST["Wednesday"]);
+		else $Wednesday = "";
+		if(isset($_POST["Thursday"]))$Thursday = trim($_POST["Thursday"]);
+		else $Thursday = "";
+		if(isset($_POST["Friday"]))$Friday = trim($_POST["Friday"]);
+		else $Friday = "";
+		if(isset($_POST["Saturday"]))$Saturday = trim($_POST["Saturday"]);
+		else $Saturday = "";
+		if(isset($_POST["Sunday"]))$Sunday = trim($_POST["Sunday"]);
+		else $Sunday = "";
+		
+		$temp_array = array(
+			"Monday" => $Monday,
+			"Tuesday" => $Tuesday,
+			"Wednesday" => $Wednesday,
+			"Thursday" => $Thursday,
+			"Friday" => $Friday,
+			"Saturday" => $Saturday,
+			"Sunday" => $Sunday
+		);
+		
+		//the string that will parse all this data
+		$parser_string = "";
+		
+		foreach($temp_array as $day => $value){
+			if(!empty($value)){
+				$parser_string .= $day . "-checked,";
+			}else{
+				$parser_string .= $day . "-unchecked,";
+			}
+		}
+		$parser_string = substr($parser_string, 0, -1);
+		echo $parser_string;
+		
+		//put that parsed line back into the database
+		$declineReqSql = "UPDATE car SET days_na = ? WHERE car_id = ?";
+		
+		if($declineReqSqlStmt = mysqli_prepare($link, $declineReqSql)){
+			
+			mysqli_stmt_bind_param($declineReqSqlStmt, "si", $parser_string, $this_car_id);
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($declineReqSqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($declineReqSqlStmt);
+				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($declineReqSqlStmt);
+		
+		
+	}
 	
 	//for when they want to legit delete their car
 	if(isset($_POST["deleteCar"])){

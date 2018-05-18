@@ -14,8 +14,8 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 }
 
 //get the car that they clicked
-$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
+$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = $temp_days_na = "";
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, days_na, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -23,7 +23,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $car_owner_users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $temp_days_na, $car_owner_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -76,9 +76,21 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			// Close statement
 			mysqli_stmt_close($getLocSqlStmt);
 			
+			//parse the days variable into something checkable
+			$days_array = explode(",", $temp_days_na);
+			$showDayArea = $showDayParam = "";
+			foreach ($days_array as $day){
+				$info_array = explode("-", $day);
+				if($info_array[1] == "unchecked") $showDayParam .= $info_array[0] . "<br>";
+			}
+			
+			if(!empty($showDayParam)){
+				$showDayArea = "<br><br><h4>The Owner of this car has specified that it can't be booked<br>on the following days:<h4><h5>" . $showDayParam . "</h5>";
+			}
 			
 			$textArea .= "<div class='page-header'>
-			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4></div>
+			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4>
+			" . $showDayArea . "</div>
 			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
 			<li>" . $odometer . '</li></ul>';
 		}
@@ -178,6 +190,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}else{
 			
 			
+			//parse the days variable into something checkable
+			$days_array = explode(",", $temp_days_na);
+			$day_checker = array();
+			foreach ($days_array as $day){
+				$info_array = explode("-", $day);
+				if($info_array[1] == "unchecked")array_push($day_checker, $info_array[0]);
+			}
+			
+			
 			//check if this car belongs to them
 			$car_check_id = 0;
 			$carCheckSql = "SELECT car_id FROM car WHERE users_id = '" . $_SESSION['users_id'] . "'";
@@ -196,7 +217,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 							echo '<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
 							<p><a href="/car_list_main.php" class="btn">See All Cars</a></p>
 							</div>';
-							exit("You already own this car, so you don't need to rent it out.");
+							exit("<h3>You already own this car, so you don't need to rent it out.</h3>");
 						}
 						
 					}
@@ -207,6 +228,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			
 			$alreadyBooked = false;
 			
+			
+			
+			//check against any dates it's already booked at
 			$sql = "SELECT startdate, enddate FROM reservation WHERE reservation_status NOT IN ('declined') AND car_id = " . $car_id;
 			if($stmt = mysqli_prepare($link, $sql)){
 
@@ -230,6 +254,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 								if($i == $j){
 									echo "You can't book those dates, because this car is already booked at " . date('d/m/Y', $j);
 									$alreadyBooked = true;
+								}
+								
+								//check against the days allowed 
+								foreach($day_checker as $day){
+									if(date('l', $j) == $day){
+										echo "Your attempted booking lies on " . $day . ", a day that the owner has specified can't be used.";
+										$alreadyBooked = true;
+									}
 								}
 							}
 						}

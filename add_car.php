@@ -48,6 +48,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$param_transmission = trim($_POST['transmission']);
 		$param_odometer = trim($_POST['odometer']);
 		$status = "listed";
+		$days_na = 'Monday-checked,Tuesday-checked,Wednesday-checked,Thursday-checked,Friday-checked,Saturday-checked,Sunday-checked';
 		
 		// Validate car
 		if(empty($_POST["carSubmit"]) || !is_numeric($param_odometer)){
@@ -56,11 +57,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			echo "That registration doesn't match any that are linked to your license.";
 		}else{	
 			// Prepare an insert statement
-			$sql = "INSERT INTO car (registration, model, manufacturer, transmission, odometer, status, users_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			$sql = "INSERT INTO car (registration, model, manufacturer, transmission, odometer, status, days_na, users_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			if($stmt = mysqli_prepare($link, $sql)){
 				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "ssssisi", $param_rego, $param_model, $param_manufacturer, $param_transmission, $param_odometer, $status, $users_id);
+				mysqli_stmt_bind_param($stmt, "ssssissi", $param_rego, $param_model, $param_manufacturer, $param_transmission, $param_odometer, $status, $days_na, $users_id);
 				
 				// Attempt to execute the prepared statement
 				if(mysqli_stmt_execute($stmt)){

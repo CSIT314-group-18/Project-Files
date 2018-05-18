@@ -30,6 +30,7 @@ CREATE TABLE car (
     odometer INT NOT NULL,
 	fee DOUBLE NOT NULL,
 	status VARCHAR(50),
+	days_na VARCHAR(255),
     users_id INT NOT NULL,
 	PRIMARY KEY (car_id)
 );

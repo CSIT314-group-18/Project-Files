@@ -14,8 +14,8 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 }
 
 //get the car that they clicked
-$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, users_id FROM car WHERE car_id = " . $car_id;
+$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = $temp_days_na = "";
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, days_na, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -23,7 +23,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $owner_users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $temp_days_na, $owner_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -76,8 +76,21 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			// Close statement
 			mysqli_stmt_close($getLocSqlStmt);
 			
+			//parse the days variable into something checkable
+			$days_array = explode(",", $temp_days_na);
+			$showDayArea = $showDayParam = "";
+			foreach ($days_array as $day){
+				$info_array = explode("-", $day);
+				if($info_array[1] == "unchecked") $showDayParam .= $info_array[0] . "<br>";
+			}
+			
+			if(!empty($showDayParam)){
+				$showDayArea = "<br><br><h4>The Owner of this car has specified that it can't be booked<br>on the following days:<h4><h5>" . $showDayParam . "</h5>";
+			}
+			
 			$textArea .= "<div class='page-header'>
-			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4></div>
+			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4>
+			" . $showDayArea . "</div>
 			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
 			<li>" . $odometer . '</li></ul>';
 		}
