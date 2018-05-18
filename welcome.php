@@ -91,9 +91,9 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			<li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
 			<div id="odoChange' . $car_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="text" name="odo" class="form-control" value= "' . $odometer . '">
+			<input type="number" name="odo" class="form-control" value= "' . $odometer . '">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="odoChange" class="btn btn-primary" value="Submit"></form></div></li>
+			<input type="submit" name="odoChange" class="btn" value="Submit"></form></div></li>
 			<li>' . $status . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'statusChange'," . $car_id . ')">List/Unlist Car</button>
 			<div id="statusChange' . $car_id . '" style="display:none">
 			<p>Are you sure you want to<br> switch your cars listed status?<br> (you can change it again later)</p>
@@ -135,8 +135,9 @@ mysqli_stmt_close($getCarSqlStmt);
 
 //get the parts of the users account, ready to change
 $userAccountArea = $username = $fname = $lname = $facebook = $street = $suburb = $postcode = $city = $country = "";
-$location_id = $balance =  0;
-$getuserInfoSql = "SELECT fname, lname, facebook, location_id, balance FROM users WHERE users_id = " . $users_id;
+$location_id = $balance = $cc_info = 0;
+$cc_info_array = array();
+$getuserInfoSql = "SELECT fname, lname, facebook, location_id, balance, cc_info FROM users WHERE users_id = " . $users_id;
 if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 	
 	// Attempt to execute the prepared statement
@@ -144,7 +145,7 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getuserInfoSqlStmt);
-		mysqli_stmt_bind_result($getuserInfoSqlStmt, $fname, $lname, $facebook, $location_id, $balance);
+		mysqli_stmt_bind_result($getuserInfoSqlStmt, $fname, $lname, $facebook, $location_id, $balance, $cc_info);
 		if(mysqli_stmt_num_rows($getuserInfoSqlStmt) != 1){
                     $userAccountArea = "Error, your info wasn't retrievable.";
 		}
@@ -169,6 +170,13 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 				mysqli_stmt_close($getLocSqlStmt);
 			}
 			
+			
+			$cc_info_array = explode("-", $cc_info);
+			if(!isset($cc_info_array[1])){
+				$cc_info_array[0] = "";
+				$cc_info_array[1] = "";
+			}
+			
 			$userAccountArea .= "<h3>" . $fname . " " . $lname . "</h3><ul style='list-style-type:none'><li style='border: 2px solid grey;'>Your Balance is $" . $balance . "<br></li>
 			<li>" . htmlspecialchars($_SESSION["username"]) . 
 			'&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'unameChange'," . $users_id . ')">Change Username</button>
@@ -188,6 +196,13 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 			<div id="fbChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="text" name="newFb" class="form-control" value="' . $facebook . '">
 			<input type="submit" name="fbChange" class="btn btn-primary" value="Change Facebook Link"></form><br><br></div></li>
+			
+			<li><button class="btn" onclick="showChanger(' . "'ccInfoChange'," . $users_id . ')">Change Credit Card Info</button>
+			<div id="ccInfoChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			Card Number<input type="number" name="newCcNum" class="form-control" value="' . $cc_info_array[0] . '">
+			Security Code<input type="number" style="width:100px;" name="newCcSec" class="form-control" value="' . $cc_info_array[1] . '">
+			<input type="submit" name="ccInfoChange" class="btn btn-primary" value="Change Credit Card Info"></form><br><br></div></li>
+			
 			<li><h3>Your Location</h3><br>' . $street . '<br>' . $suburb . '<br>' . $postcode . '<br>' . $city . '<br>' . $country . '<br>' . '
 			<button class="btn" onclick="showChanger(' . "'addressChange'," . $users_id . ')">Change Address</button>
 			<div id="addressChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
@@ -467,8 +482,8 @@ if($getPaySqlStmt = mysqli_prepare($link, $getPaySql)){
 			<legend>Card Type</legend><ul style='list-style-type:none;'><li><input id=visa name=cardtype type=radio /><label for=visa>VISA</label></li><li>
 			<input id=amex name=cardtype type=radio /><label for=amex>AmEx</label></li><li>
 			<input id=mastercard name=cardtype type=radio /><label for=mastercard>Mastercard</label></li></ol></fieldset>
-			</li><li><label for=cardnumber>Card Number</label><input id=cardnumber name=cardnumber type=number required /></li>
-			<li><label for=secure>Security Code</label><input id=secure name=secure type=number required /></li><li>
+			</li><li><label for=cardnumber>Card Number</label><input id=cardnumber name=cardnumber type=number value='" . $cc_info_array[0] . "' required /></li>
+			<li><label for=secure>Security Code</label><input id=secure name=secure type=number value='" . $cc_info_array[1] . "' required /></li><li>
 			<label for=namecard>Name on Card</label><input id=namecard name=namecard type=text placeholder='Exact name as on the card' required />
 			</li></ol></fieldset>";
 
@@ -1264,6 +1279,42 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			
 		}
 	}
+	
+
+	//if the user wants to update their cc info
+	if(isset($_POST["ccInfoChange"])){
+		$new_cc_num = trim($_POST["newCcNum"]);
+		$new_cc_sec = trim($_POST["newCcSec"]);
+		
+		$regex = "/[0-9]$/";
+		if(preg_match($regex, $new_cc_num) && preg_match($regex, $new_cc_sec)){
+			
+			$new_cc_num = implode("-", array($new_cc_num, $new_cc_sec));
+			echo $new_cc_num;
+			//update their sql
+			$sql = "UPDATE users SET cc_info = ? WHERE username = '" . htmlspecialchars($_SESSION['username']) . "'";
+
+			if($stmt = mysqli_prepare($link, $sql)){
+				// Bind variables to the prepared statement as parameters
+				mysqli_stmt_bind_param($stmt, "s", $new_cc_num);
+				
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($stmt)){
+					/* store result */
+					mysqli_stmt_store_result($stmt);
+					echo "Credit Card Info changed successfully.";
+					header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+				} else{
+					echo "Oops! Something went wrong. Please try again later.";
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($stmt);
+		}else{
+			echo "That isn't a valid credit card.";
+		}
+	}
+
 	
 	//if the user submitted a change of address
 	if(isset($_POST["addressChange"])){

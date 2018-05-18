@@ -238,8 +238,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 //get all the cars
 $textArea = $model = $manufacturer = $transmission = $street = $suburb = $postcode = $city = $country = "";
-$car_id = $temp_users_id = $temp_location_id = $odometer = 0;
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, users_id FROM car WHERE status = 'listed' AND" . $userSearchString;
+$car_id = $temp_users_id = $temp_location_id = $odometer = $year = 0;
+$getCarSql = "SELECT car_id, model, manufacturer, transmission, year, odometer, users_id FROM car WHERE status = 'listed' AND" . $userSearchString;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -247,7 +247,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $temp_users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $year, $odometer, $temp_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -300,8 +300,8 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			mysqli_stmt_close($getLocSqlStmt);
 			
 			$textArea .= "<div class='carArea'><ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $street . ", " . $suburb . 
-			", " . $postcode . ", " . $city . ", " . $country . "<br><br></li><li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
-			$textArea .= "<li>" . $odometer . '<br>
+			", " . $postcode . ", " . $city . ", " . $country . "<br><br></li><li>" . $year . " " . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
+			$textArea .= "<li>Odometer: " . $odometer . 'km<br>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="seeCar" class="btn btn-primary" value="View More Info"></form></div></li></ul>';

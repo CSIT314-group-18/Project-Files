@@ -14,8 +14,10 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 }
 
 //get the car that they clicked
-$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = $manufacturer = $transmission = $odometer = $temp_days_na = "";
-$getCarSql = "SELECT car_id, model, manufacturer, transmission, odometer, days_na, users_id FROM car WHERE car_id = " . $car_id;
+$addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = 
+$manufacturer = $transmission = $rego = $odometer = $colour = $engine_type = $drive_layout = 
+$body_type = $seats = $doors = $year = $temp_days_na = "";
+$getCarSql = "SELECT car_id, registration, model, manufacturer, transmission, colour, engine_type, drive_layout, body_type, seats, doors, year, odometer, days_na, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
 	// Attempt to execute the prepared statement
@@ -23,7 +25,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		
 		// Store result, print it to the variable
 		mysqli_stmt_store_result($getCarSqlStmt);
-		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $temp_days_na, $car_owner_users_id);
+		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $rego, $model, $manufacturer, $transmission, $colour, $engine_type, $drive_layout, $body_type, $seats, $doors, $year, $odometer, $temp_days_na, $car_owner_users_id);
 		
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -89,10 +91,11 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			}
 			
 			$textArea .= "<div class='page-header'>
-			<h1>" . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4>
+			<h1>" . $year . " " . $model . "</h1><h4>This car will be picked up and dropped off from " . $addressArea . "</h4>
 			" . $showDayArea . "</div>
-			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>
-			<li>" . $odometer . '</li></ul>';
+			<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li><li>" . $colour . "</li>
+			<li>" . $engine_type . "</li><li>" . $drive_layout . "</li><li>" . $body_type . "</li><li>" . $seats . " seats</li>
+			<li>" . $doors . " doors</li><li>Odometer: " . $odometer . 'km</li></ul>';
 		}
 	}
 }
