@@ -224,6 +224,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         body{ font: 14px sans-serif; }
         .wrapper{ width: 350px; padding: 20px; }
     </style>
+	
+	<script>
+		function fillFields() {
+			document.getElementById("username").value = "tim95";
+			document.getElementById("password").value = "password";
+			document.getElementById("confirm_password").value = "password";
+			document.getElementById("fname").value = "Tim";
+			document.getElementById("lname").value = "Yates";
+			document.getElementById("license_number").value = "2155655";
+			document.getElementById("street").value = "12 Small Street";
+			document.getElementById("suburb").value = "Figtree";
+			document.getElementById("postcode").value = "2500";
+			document.getElementById("city").value = "Wollongong";
+			document.getElementById("country").value = "Australia";
+		}
+	
+	</script>
 </head>
 <body>
     <div class="wrapper">
@@ -232,33 +249,33 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">
                 <label>Username</label>
-                <input type="text" name="username"class="form-control" value="<?php echo $username; ?>">
+                <input type="text" id="username" name="username"class="form-control" value="<?php echo $username; ?>">
                 <span class="help-block"><?php echo $username_err; ?></span>
             </div>    
             <div class="form-group <?php echo (!empty($password_err)) ? 'has-error' : ''; ?>">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control" value="<?php echo $password; ?>">
+                <input type="password" id="password" name="password" class="form-control" value="<?php echo $password; ?>">
                 <span class="help-block"><?php echo $password_err; ?></span>
             </div>
             <div class="form-group <?php echo (!empty($confirm_password_err)) ? 'has-error' : ''; ?>">
                 <label>Confirm Password</label>
-                <input type="password" name="confirm_password" class="form-control" value="<?php echo $confirm_password; ?>">
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" value="<?php echo $confirm_password; ?>">
                 <span class="help-block"><?php echo $confirm_password_err; ?></span>
             </div>
 			
 			<br>
 			<div class="form-group">
-			First Name<input type="text" name="fname" class="form-control">
-			Last Name<input type="text" name="lname" class="form-control">
-			License Number<input type="text" name="license_number" class="form-control">
+			First Name<input type="text" id="fname" name="fname" class="form-control">
+			Last Name<input type="text" id="lname" name="lname" class="form-control">
+			License Number<input type="text" id="license_number" name="license_number" class="form-control">
 			</div>
 			
 			<div class="form-group">
-			Street<input type="text" name="street" class="form-control">
-			Suburb<input type="text" name="suburb" class="form-control">
-			Postcode<input type="text" name="postcode" class="form-control">
-			City<input type="text" name="city" class="form-control">
-			Country<input type="text" name="country" class="form-control">
+			Street<input type="text" id="street" name="street" class="form-control">
+			Suburb<input type="text" id="suburb" name="suburb" class="form-control">
+			Postcode<input type="text" id="postcode" name="postcode" class="form-control">
+			City<input type="text" id="city" name="city" class="form-control">
+			Country<input type="text" id="country" name="country" class="form-control">
 			</div>
 			
             <div class="form-group">
@@ -266,6 +283,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <input type="reset" class="btn btn-default" value="Reset">
             </div>
             <p>Already have an account? <a href="login.php">Login here</a>.</p>
+			Or <button class="form-group" style="btn" onclick="fillFields();">Autofill fields</button>
         </form>
 		
     </div>    

@@ -198,6 +198,23 @@ mysqli_close($link);
     <style type="text/css">
         body{ font: 14px sans-serif; text-align: center; }
     </style>
+	<script>
+		function fillFields() {
+			document.getElementById("fileToUpload").value = "";
+			document.getElementById("registration").value = "34DFXY";
+			document.getElementById("model").value = "Yaris";
+			document.getElementById("manufacturer").value = "Toyota";
+			document.getElementById("transmission").value = "Automatic";
+			document.getElementById("colour").value = "White";
+			document.getElementById("engine_type").value = "6 Cylinder";
+			document.getElementById("drive_layout").value = "2WD";
+			document.getElementById("body_type").value = "Sedan";
+			document.getElementById("seats").value = "5";
+			document.getElementById("doors").value = "5";
+			document.getElementById("year").value = "2013";
+			document.getElementById("odometer").value = "60123";
+		}
+	</script>
 </head>
 <body>
     <div class="page-header">
@@ -208,10 +225,10 @@ mysqli_close($link);
 			Select image to upload:
 			
 			<ul style='list-style-type:none; padding-left:35%; padding-right:35%;'>
-			<li><input type="file" class="form-control" name="fileToUpload" id="fileToUpload"></li>
-			<li><input type="text" name="registration"class="form-control" placeholder="registration" required></li>
-			<li><input type="text" name="model"class="form-control" placeholder="Model" required></li>
-			<li><select class="form-control" name="manufacturer" required>
+			<li><input type="file" class="form-control" id="fileToUpload" name="fileToUpload" id="fileToUpload"></li>
+			<li><input type="text" id="registration" name="registration"class="form-control" placeholder="registration" required></li>
+			<li><input type="text" id="model" name="model" class="form-control" placeholder="Model" required></li>
+			<li><select class="form-control" id="manufacturer" name="manufacturer" required>
 			  <option value="" disabled selected>Manufacturer</option>
 			  <option value="volvo">Volvo</option>
 			  <option value="fiat">Fiat</option>
@@ -222,12 +239,12 @@ mysqli_close($link);
 			  <option value="volkswagen">Volkswagen</option>
 			  <option value="bmw">BMW</option>
 			</select></li>
-			<li><select class="form-control" name="transmission" required>
+			<li><select class="form-control" id="transmission" name="transmission" required>
 			  <option value="" disabled selected>Transmission</option>
 			  <option value="automatic">Automatic</option>
 			  <option value="manual">Manual</option>
 			</select></li>
-			<li><select class="form-control" name="colour" required>
+			<li><select class="form-control" id="colour" name="colour" required>
 			  <option value="" disabled selected>Colour</option>
 			  <option value="Black">Black</option>
 			  <option value="White">White</option>
@@ -240,7 +257,7 @@ mysqli_close($link);
 			  <option value="Orange">Orange</option>
 			  <option value="Purple">Purple</option>
 			</select></li>
-			<li><select class="form-control" name="engine_type" required>
+			<li><select class="form-control" id="engine_type" name="engine_type" required>
 			  <option value="" disabled selected>Engine Type</option>
 			  <option value="2 Cylinder">2 Cylinder</option>
 			  <option value="4 Cylinder">4 Cylinder</option>
@@ -249,12 +266,12 @@ mysqli_close($link);
 			  <option value="12 Cylinder">12 Cylinder</option>
 			  <option value="Electric">Electric</option>
 			</select></li>
-			<li><select class="form-control" name="drive_layout" required>
+			<li><select class="form-control" id="drive_layout" name="drive_layout" required>
 			  <option value="" disabled selected>Drive Layout</option>
 			  <option value="2WD">2WD</option>
 			  <option value="4WD">4WD</option>
 			</select></li>
-			<li><select class="form-control" name="body_type" required>
+			<li><select class="form-control" id="body_type" name="body_type" required>
 			  <option value="" disabled selected>Body Type</option>
 			  <option value="Sedan">Sedan</option>
 			  <option value="SUV">SUV</option>
@@ -264,7 +281,7 @@ mysqli_close($link);
 			  <option value="Coupe">Coupe</option>
 			  <option value="Wagon">Wagon</option>
 			</select></li>
-			<li><select class="form-control" name="seats" required>
+			<li><select class="form-control" id="seats" name="seats" required>
 			  <option value="" disabled selected>Seats</option>
 			  <option value="2">2</option>
 			  <option value="3">3</option>
@@ -275,14 +292,14 @@ mysqli_close($link);
 			  <option value="8">8</option>
 			  <option value="9">9</option>
 			</select></li>
-			<li><select class="form-control" name="doors" required>
+			<li><select class="form-control" id="doors" name="doors" required>
 			  <option value="" disabled selected>Doors</option>
 			  <option value="2">2</option>
 			  <option value="3">3</option>
 			  <option value="4">4</option>
 			  <option value="5">5</option>
 			</select></li>
-			<li><select class="form-control" name="year" required>
+			<li><select class="form-control" id="year" name="year" required>
 				<option value="" disabled selected>Year</option>
 				<option value="2018">2018</option>
 				<option value="2017">2017</option>
@@ -404,7 +421,7 @@ mysqli_close($link);
 				<option value="1901">1901</option>
 				<option value="1900">1900</option>
 			   </select></li
-			<li><input type="text" name="odometer"class="form-control" placeholder="Current odometer reading (km)" required></li>
+			<li><input type="text" id="odometer" name="odometer" class="form-control" placeholder="Current odometer reading (km)" required></li>
 			</ul>
 			<span class="help-block"><?php echo $car_err; ?></span>
 		</div> 
@@ -412,7 +429,7 @@ mysqli_close($link);
                 <input type="submit" name="carSubmit" class="btn btn-primary" value="Submit">
         </div>
 	</form>
-	
+	Or <button class="form-group" style="btn" onclick="fillFields();">Autofill fields</button>
 	<p><a href="welcome.php" class="btn btn-danger">Back to Home</a></p>
 	
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>

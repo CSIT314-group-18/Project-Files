@@ -13,10 +13,13 @@ if(!isset($_SESSION['this_car_id']) || empty($_SESSION['this_car_id'])){
 	$car_id = $_SESSION['this_car_id'];
 }
 
+$this_users_id = trim($_SESSION['users_id']);
+
 //get the car that they clicked
 $addressArea = $street = $suburb = $postcode = $city = $country = $textArea = $model = 
 $manufacturer = $transmission = $rego = $odometer = $colour = $engine_type = $drive_layout = 
 $body_type = $seats = $doors = $year = $temp_days_na = "";
+$car_owner_users_id = 0;
 $getCarSql = "SELECT car_id, registration, model, manufacturer, transmission, colour, engine_type, drive_layout, body_type, seats, doors, year, odometer, days_na, users_id FROM car WHERE car_id = " . $car_id;
 if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 	
@@ -103,12 +106,34 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 mysqli_stmt_close($getCarSqlStmt);
 
 
-$msgOwnerArea = '<button class="btn btn-primary" onclick="showChanger(' . "'" . "msgArea" . "'" . ')">Message The Owner of This Car</button>
+//show the user that owns this car, and his overall rating from the average of all his cars' ratings
+$owner_username = $owner_fname = $owner_lname = "";
+$getRenteeSql = "SELECT username, fname, lname FROM users WHERE users_id = " . $car_owner_users_id;
+if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+		// Store result, print it to the variable
+		mysqli_stmt_store_result($getRenteeSqlStmt);
+		mysqli_stmt_bind_result($getRenteeSqlStmt, $owner_username, $owner_fname, $owner_lname);
+		mysqli_stmt_fetch($getRenteeSqlStmt);
+		
+		$msgOwnerArea = '<p>This Car is Owned by:<br><b>' . $owner_username . '</b><br>' . $owner_fname . " " . $owner_lname
+		. '</p>';
+		
+	}
+}
+// Close statement
+mysqli_stmt_close($getRenteeSqlStmt);
+
+if($car_owner_users_id != $this_users_id){
+$msgOwnerArea .= '<button class="btn btn-primary" onclick="showChanger(' . "'" . "msgArea" . "'" . ')">Message The Owner of This Car</button>
 <div id="msgArea" style="display:none">
 <form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 <input type="text" name="msg" class="form-control">
 <input type="submit" name="SendMsg" class="btn" value="Send"></form></div>';
-
+}
 
 $ratingArea = $temp_review = "";
 $temp_rating = $rating_avg = $count = 0;;
@@ -155,9 +180,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		}else if(strlen($msg) > 255){	
 			echo "That message is too long!";
 		}else{
-			
-			$this_users_id = trim($_SESSION['users_id']);
-			
 			
 			$sql = "INSERT INTO message (content, sentby, sentto) VALUES (?, ?, ?)";
 			
@@ -212,12 +234,17 @@ mysqli_close($link);
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
+	
+	<div style = "position: absolute; left: 10px;top:12%;"  align = "right">
+		<p><?php echo $msgOwnerArea; ?></p>
+	</div>
 	<p><?php echo $textArea; ?></p>
 	<p><a href="/request_conf.php" class="btn btn-primary">Request A Booking</a></p>
 	
-	<div style="position: absolute; right: 10px; top: 10px; border: 3px;">
-		<p><?php echo $msgOwnerArea; ?></p>
 	
+	
+	
+	<div style="position: absolute; right: 10px; top: 10px; border: 3px;">
 		<div style="height:50%;">
 			<p><?php echo $ratingArea; ?></p>
 		</div>

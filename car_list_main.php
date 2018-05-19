@@ -304,13 +304,15 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			$textArea .= "<li>Odometer: " . $odometer . 'km<br>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="seeCar" class="btn btn-primary" value="View More Info"></form></div></li></ul>';
+			</form></div></li></ul>';
 			$textArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="requestBooking" class="btn" value="Request This Car">
+			<input type="submit" name="requestBooking" class="btn" value="View More Info / Request">
 			</form></div><br><br><hr>';
 		}
 		$textArea .= "<br><br>";
+		
+		//<input type="submit" name="seeCar" class="btn btn-primary" value="View More Info">
 	}
 }
 // Close statement

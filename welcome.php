@@ -12,13 +12,10 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username'])){
 }
 
 
-//define how much the system takes per transaction
-$system_commission = 30.0;
-
 
 //get the verified variable and the user id from this user, to see if they need to be
 $verified = $users_id = $location_id = $account_suspended = 0;
-$divArea = $dummyPaymentArea = "";
+$divArea = $verifiedArea = $dummyPaymentArea = "";
 $getVerSql = "SELECT users_id, verifed, location_id, account_suspended FROM users WHERE username = " . "'" . htmlspecialchars($_SESSION['username']) . "'";
 if($getVerSqlStmt = mysqli_prepare($link, $getVerSql)){
 	
@@ -48,6 +45,11 @@ if($_SESSION['isAdmin'] == true){
 //make the verify form hidden if the user is already verified
 if($verified == 1){
 	$divArea = "hidden";
+}
+
+//make an unverified user unable to see the options 
+if($verified == 0){
+	$verifiedArea = "hidden";
 }
 
 $suspendedArea = "";
@@ -145,7 +147,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 						mysqli_stmt_close($getRenteeSqlStmt);
 						
 						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
-						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system commission)</li><br>';
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission of $' . $system_commission . ')</li><br><br>';
 
 					}
 					
@@ -305,6 +307,7 @@ $userAccountArea .= '<button class="btn btn-primary" onclick="showChanger(' . "'
 //get the transactions that this account has done
 $temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = 0;
 $temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = "";
+$made_trans = false;
 $sql = "SELECT owner, renter, total_fee, reservation_id FROM payment WHERE payment_status = 'paid' AND (owner = " . $users_id . " OR renter = " . $users_id . ") ORDER BY payment_id DESC";
 
 if($sqlStmt = mysqli_prepare($link, $sql)){
@@ -316,6 +319,7 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 		mysqli_stmt_bind_result($sqlStmt, $temp_owner, $temp_renter, $temp_fee, $temp_reservation_id);
 		$userAccountArea .= '<div id="showTransLog' . $users_id . '" style="display:none;overflow-y:scroll;bottom-margin:20;"><ul style="list-style-type:none">';
 		while(mysqli_stmt_fetch($sqlStmt)){
+			$made_trans = true;
 			
 			//get the dates that each transaction happened
 			$getRenteeSql = "SELECT startdate, enddate FROM reservation WHERE reservation_id = " . $temp_reservation_id;
@@ -357,9 +361,7 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 				// Close statement
 				mysqli_stmt_close($getRenteeSqlStmt);
 				
-				$temp_fee = $temp_fee - $system_commission;
-				
-				$userAccountArea .= '<li>Recieved $' . $temp_fee . ' from ' . $temp_rentername . ' for the rental dates of '
+				$userAccountArea .= '<li>Recieved $' . ($temp_fee - $system_commission) . ' from ' . $temp_rentername . ' for the rental dates of '
 				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</li><br>';
 				
 			} else if($temp_renter == $users_id){
@@ -385,7 +387,11 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 			}
 			
 		}
+		if($made_trans == false){
+			$userAccountArea .= "You haven't made any transactions yet.";
+		}
 		$userAccountArea .= '</ul></div>';
+		
 	} else{
 		echo "Oops! Something went wrong. Please try again later.";
 	}
@@ -701,8 +707,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				if(mysqli_stmt_execute($stmt)){
 					/* store result */
 					mysqli_stmt_store_result($stmt);
-					$email_err = $success;
-					header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+					//header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+					echo "<p style='color:green;'>An Identity Verification email has been sent.</p>";
 				} else{
 					echo "Oops! Something went wrong. Please try again later.";
 				}
@@ -1641,7 +1647,9 @@ mysqli_close($link);
 				</form>
 			</div>
 			
+			<div <?php echo $verifiedArea; ?>>
 			<p><a href="add_car.php" class="btn">Add a car available for rent</a></p>
+			</div>
 		</div>
 		
 		<div style = "position: absolute; right: 10px;">
@@ -1654,7 +1662,7 @@ mysqli_close($link);
 		<p><?php echo $userAccountArea; ?></p>
 		</div>
 		
-		<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+		<div <?php echo $verifiedArea; ?> style="position: absolute; left: 10px; top: 10px; border: 3px;">
 			<p><a href="/car_list_main.php" class="btn">See All Cars</a>
 			<?php echo $adminArea; ?>
 			<p><a href="/messages.php" class="btn">See Your Messages</a>
