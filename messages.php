@@ -70,7 +70,7 @@ if($Pstmt = mysqli_prepare($link, $Psql)){
 			
 			$textArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="otherUser" value="' . $get_username . '">
-			<input type="submit" name="showMessages" class="btn" value="' . $temp_otherusername . '"></form>';
+			<input type="submit" id="showMessages' . $get_username . '" name="showMessages" class="btn" value="' . $temp_otherusername . '"></form>';
 			
 			array_push($already_shown_users, $get_username);
 			}
@@ -89,6 +89,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
 	if(isset($_POST["showMessages"])){
 		$msgArea = $msg = "";
+		$unsent_msg = "";
 		$other_user = trim($_POST['otherUser']);
 		$temp_sentto = $temp_sentby = 0;
 		
@@ -120,11 +121,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($getUsernameStmt);
 		
-		$msgArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+		$msgArea .= '</div><div style="bottom:20%; width:60%;position: absolute;left: 20%;"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 		<input type="hidden" name="otherUser" value="' . $other_user . '">
-		<input type="text" name="msg" class="form-control">
+		<input type="text" name="msg" class="form-control" value"' . $unsent_msg . '">
 		<input type="submit" name="SendMsg" class="btn" value="Send"></form>';
 		
+		echo '<script>setInterval(function(){
+				var thisConversation = document.getElementById("showMessages' . $other_user . '"); 
+				thisConversation.click();
+				}, 15000);
+				window.onload = function(){
+					var myDiv = document.getElementById("messageArea");
+					myDiv.scrollTop = myDiv.scrollHeight;
+				};
+				
+			</script>';
 	}
 	
 	//if the user sends a message to the owner of that car
@@ -156,6 +167,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			}
 			// Close statement
 			mysqli_stmt_close($stmt);
+			echo '<script>window.onload = function(){
+				var thisConversation = document.getElementById("showMessages' . $other_user . '"); 
+				thisConversation.click();
+				};
+				</script>';
 		}
 	}
 	
@@ -181,6 +197,7 @@ mysqli_close($link);
 			width: 60%;
 			left: 20%;
 			overflow-y: scroll;
+			height:50%;
 		}
 		
 		.usersSection{
@@ -221,11 +238,10 @@ mysqli_close($link);
 	<p><?php echo $textArea; ?></p>
 	</div>
 	
-	<div style="overflow:hidden;">
-		<div class="messageArea">
-		<p><?php echo $msgArea; ?></p>
-		</div>
+	<div id="messageArea" class="messageArea">
+	<?php echo $msgArea; ?>
 	</div>
+	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>

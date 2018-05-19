@@ -273,11 +273,12 @@ $param_startdate = $param_enddate = "";
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
-	$sentby = trim($_POST['sentby']);
-	$sentto = trim($_POST['sentto']);
+	
 	
 	//if the user sends a message to the owner of that car
 	if(isset($_POST["SendMsg"])){
+		$sentby = trim($_POST['sentby']);
+		$sentto = trim($_POST['sentto']);
 		$msg = trim($_POST["msg"]);
 		if(empty($msg)){
 			echo "Please enter a message.";
