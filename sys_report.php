@@ -11,6 +11,8 @@ if(!isset($_SESSION['username']) || empty($_SESSION['username']) || ($_SESSION['
   exit;
 }
 
+
+/*
 $locationSearchString = $userSearchString = "";
 $emptyArray = true;
 $users_id_array = array();
@@ -23,7 +25,6 @@ if($Pstmt = mysqli_prepare($link, $Psql)){
 	
 	// Attempt to execute the prepared statement
 	if(mysqli_stmt_execute($Pstmt)){
-		/* store result */
 		mysqli_stmt_store_result($Pstmt);
 		mysqli_stmt_bind_result($Pstmt, $tempUser);
 		
@@ -42,8 +43,148 @@ if($Pstmt = mysqli_prepare($link, $Psql)){
 // Close statement
 mysqli_stmt_close($Pstmt);
 
+*/
+//get the transactions
+$temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = $temp_id = $system_balance = 0;
+$temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = $userAccountArea = "";
+$made_trans = false;
+$sql = "SELECT payment_id, owner, renter, total_fee, reservation_id FROM payment WHERE payment_status = 'paid'";
+
+if($sqlStmt = mysqli_prepare($link, $sql)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($sqlStmt)){
+		/* store result */
+		mysqli_stmt_store_result($sqlStmt);
+		mysqli_stmt_bind_result($sqlStmt, $temp_id, $temp_owner, $temp_renter, $temp_fee, $temp_reservation_id);
+		$userAccountArea .= '<ul style="list-style-type:none">';
+		while(mysqli_stmt_fetch($sqlStmt)){
+			$made_trans = true;
+			
+			//get the dates that each transaction happened
+			$getRenteeSql = "SELECT startdate, enddate FROM reservation WHERE reservation_id = " . $temp_reservation_id;
+			if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+			
+				// Attempt to execute the prepared statement
+				if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+					// Store result, print it to the variable
+					mysqli_stmt_store_result($getRenteeSqlStmt);
+					mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_startdate, $temp_enddate);
+					mysqli_stmt_fetch($getRenteeSqlStmt);
+				}
+			}
+			// Close statement
+			mysqli_stmt_close($getRenteeSqlStmt);
+			
+			//convert the dates into something readable
+			$temp_startdate = substr($temp_startdate, 0, -8);
+			$temp_enddate = substr($temp_enddate, 0, -8);
+			$temp_startdate = strtotime($temp_startdate);
+			$temp_enddate = strtotime($temp_enddate);
+			
+				
+				//get the person who's not you
+				$getRenteeSql = "SELECT username FROM users WHERE users_id = " . $temp_renter;
+				if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+				
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getRenteeSqlStmt);
+						mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_rentername);
+						mysqli_stmt_fetch($getRenteeSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getRenteeSqlStmt);
+				
+				//get the person who's not you
+				$getRenteeSql = "SELECT username FROM users WHERE users_id = " . $temp_owner;
+				if($getRenteeSqlStmt = mysqli_prepare($link, $getRenteeSql)){
+				
+					// Attempt to execute the prepared statement
+					if(mysqli_stmt_execute($getRenteeSqlStmt)){
+
+						// Store result, print it to the variable
+						mysqli_stmt_store_result($getRenteeSqlStmt);
+						mysqli_stmt_bind_result($getRenteeSqlStmt, $temp_ownername);
+						mysqli_stmt_fetch($getRenteeSqlStmt);
+					}
+				}
+				// Close statement
+				mysqli_stmt_close($getRenteeSqlStmt);
+				
+				$userAccountArea .= '<li><fieldset><legend>Transaction ID: ' . $temp_id . '</legend>' . $temp_rentername . ' paid ' . $temp_ownername
+				. ' $' . $temp_fee . ' for the rental dates of '
+				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</fieldset></li><br>';
+			
+		}
+		
+		//get the already existing balance from the system, to update it
+		$getSysBal = "SELECT balance FROM users WHERE users_id = 1";
+		
+		if($getSysBalStmt = mysqli_prepare($link, $getSysBal)){
+			
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($getSysBalStmt)){
+				/* store result */
+				mysqli_stmt_store_result($getSysBalStmt);
+				mysqli_stmt_bind_result($getSysBalStmt, $system_balance);
+				mysqli_stmt_fetch($getSysBalStmt);
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($getSysBalStmt);
+		
+		
+		if($made_trans == false){
+			$userAccountArea .= "There haven't been any transactions yet.";
+		}
+		$userAccountArea .= '</ul><br><br><h4>The system made $' . $system_balance . ' in commission.<br>The current commission is '
+		. $system_commission . '% of any transaction.</h4><br><br><br>';
+		
+	} else{
+		echo "Oops! Something went wrong. Please try again later.";
+	}
+}
+// Close statement
+mysqli_stmt_close($sqlStmt);
+
+$userAccountArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input style="width:50px;" type="number" name="newCommission" value="' . $system_commission . '" min="0" max="100">%
+			<input type="submit" name="changeCommission" class="btn" value="Change The Commission"></form>';
+
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
+	
+	//changes the commission
+	if(isset($_POST["changeCommission"])){
+		$newCommission = trim($_POST["newCommission"]);
+		
+		// Prepare an update statement
+		$acceptReqSql = "UPDATE system SET commission = ? WHERE commission = " . $system_commission;
+		
+		if($acceptReqSqlStmt = mysqli_prepare($link, $acceptReqSql)){
+			
+			mysqli_stmt_bind_param($acceptReqSqlStmt, "d", $newCommission);
+			// Attempt to execute the prepared statement
+			if(mysqli_stmt_execute($acceptReqSqlStmt)){
+				/* store result */
+				mysqli_stmt_store_result($acceptReqSqlStmt);
+				header("location: " . htmlspecialchars($_SERVER["PHP_SELF"]));
+			} else{
+				echo "Oops! Something went wrong. Please try again later.";
+			}
+		}
+		// Close statement
+		mysqli_stmt_close($acceptReqSqlStmt);
+		
+	}
+	
 	
 	if(isset($_POST["locationSearch"])){
 		$street = trim($_POST["street"]);
@@ -158,6 +299,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	
 }	
 
+
+
+/*
+
 //get all the users
 $textArea = $temp_username = $temp_fname = $temp_lname = $temp_verified = $temp_account_suspended = "";
 $temp_users_id = $temp_license_number = 0;
@@ -188,6 +333,9 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 // Close statement
 mysqli_stmt_close($getCarSqlStmt);
 
+*/
+
+
 // Close connection
 mysqli_close($link);
 ?>
@@ -204,13 +352,13 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>All Users</h1>
+        <h1>All Transactions</h1>
     </div>
 	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
-		<div class="form-group" style = "position: absolute; left: 10px;">
+		<div hidden class="form-group" style = "position: absolute; left: 10px;">
 			<h2>Search by location:</h1>
 			<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
 			Street<input type="text" name="street" class="form-control">
@@ -223,7 +371,7 @@ mysqli_close($link);
 		</div>
 	
 	
-	<p><?php echo $textArea; ?></p>
+	<p><?php echo $userAccountArea; ?></p>
 	
 	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>

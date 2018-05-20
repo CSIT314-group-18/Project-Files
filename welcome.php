@@ -41,6 +41,10 @@ if($_SESSION['isAdmin'] == true){
 	$adminArea .= "<p><a href='/user_list_main.php' class='btn'>See All Users</a></p>";
 }
 
+//if it's the system, then give them special options
+if($users_id == 1){
+	$adminArea .= "<p><a href='/sys_report.php' class='btn'>See The Logs</a></p>";
+}
 
 //make the verify form hidden if the user is already verified
 if($verified == 1){
@@ -147,7 +151,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 						mysqli_stmt_close($getRenteeSqlStmt);
 						
 						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
-						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission of $' . $system_commission . ')</li><br><br>';
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission of ' . $system_commission . '%)</li><br><br>';
 
 					}
 					
@@ -976,6 +980,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	//for when user presses the pay button
 	if(isset($_POST["payButtonPressed"])){
 		
+		
+		
 		//update the reservation and payment tables showing the payment has been made
 		$reservation_id = trim($_POST["reservation_id"]);
 		
@@ -998,6 +1004,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
 		
+		$this_commission_amount = ($temp_fee / 100) * $system_commission;
+		
 		//get the already existing balance from the owner, to update it
 		$sql = "SELECT balance FROM users WHERE users_id = " . $temp_owner;
 		
@@ -1016,7 +1024,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
 		
-		$temp_owner_balance = ($temp_owner_balance + $temp_fee) - $system_commission;
+		$temp_owner_balance = ($temp_owner_balance + $temp_fee) - $this_commission_amount;
 		
 		//set the balance of the owner that much more
 		$sql = "UPDATE users SET balance = ? WHERE users_id = " . $temp_owner;
@@ -1096,7 +1104,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Close statement
 		mysqli_stmt_close($sqlStmt);
 		
-		$system_balance = $system_balance + $system_commission;
+		$system_balance = $system_balance + $this_commission_amount;
 		
 		//set the balance of the owner that much more
 		$sql = "UPDATE users SET balance = ? WHERE users_id = 1";

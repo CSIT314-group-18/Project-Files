@@ -1,3 +1,10 @@
+CREATE TABLE system (
+    commission DOUBLE NOT NULL,
+	PRIMARY KEY (commission)
+);
+
+INSERT INTO system (commission) VALUE (5.0);
+
 CREATE TABLE users (
     users_id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -40,15 +47,6 @@ CREATE TABLE car (
 	days_na VARCHAR(255),
     users_id INT NOT NULL,
 	PRIMARY KEY (car_id)
-);
-
-CREATE TABLE car_av (
-	av_id INT NOT NULL AUTO_INCREMENT,
-	startdate DATETIME NOT NULL,
-	enddate DATETIME NOT NULL,
-	car_av_status VARCHAR(50) NOT NULL,
-	car_id INT NOT NULL,
-	PRIMARY KEY (av_id)
 );
 
 CREATE TABLE car_rating (

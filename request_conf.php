@@ -331,7 +331,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		
 		// Set parameters
 		$status = "requested";
-		$amount = 50.0;
+		$amount = 0;
 		
 		$param_startdate = trim($_POST['startdate']);
 		$param_enddate = trim($_POST['enddate']);
