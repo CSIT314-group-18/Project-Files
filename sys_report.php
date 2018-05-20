@@ -44,11 +44,42 @@ if($Pstmt = mysqli_prepare($link, $Psql)){
 mysqli_stmt_close($Pstmt);
 
 */
+
+
+
 //get the transactions
 $temp_owner = $temp_renter = $temp_fee = $temp_reservation_id = $temp_id = $system_balance = 0;
 $temp_ownername = $temp_rentername = $temp_startdate = $temp_enddate = $userAccountArea = "";
 $made_trans = false;
 $sql = "SELECT payment_id, owner, renter, total_fee, reservation_id FROM payment WHERE payment_status = 'paid'";
+
+
+//get the already existing balance from the system, to update it
+$getSysBal = "SELECT balance FROM users WHERE users_id = 1";
+
+if($getSysBalStmt = mysqli_prepare($link, $getSysBal)){
+	
+	// Attempt to execute the prepared statement
+	if(mysqli_stmt_execute($getSysBalStmt)){
+		/* store result */
+		mysqli_stmt_store_result($getSysBalStmt);
+		mysqli_stmt_bind_result($getSysBalStmt, $system_balance);
+		mysqli_stmt_fetch($getSysBalStmt);
+	} else{
+		echo "Oops! Something went wrong. Please try again later.";
+	}
+}
+// Close statement
+mysqli_stmt_close($getSysBalStmt);
+
+
+
+$userAccountArea .= '</ul><br><br><h4>The system made $' . $system_balance . ' in commission.<br>The current commission is '
+. $system_commission . '% of any transaction.</h4><br>
+			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<input style="width:50px;" type="number" name="newCommission" value="' . $system_commission . '" min="0" max="100">%
+			<input type="submit" name="changeCommission" class="btn" value="Change The Commission"></form><br><br><br>';
+
 
 if($sqlStmt = mysqli_prepare($link, $sql)){
 	
@@ -121,31 +152,9 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 				. date('D d/m/Y', $temp_startdate) . ' to ' . date('D d/m/Y', $temp_enddate) .  '</fieldset></li><br>';
 			
 		}
-		
-		//get the already existing balance from the system, to update it
-		$getSysBal = "SELECT balance FROM users WHERE users_id = 1";
-		
-		if($getSysBalStmt = mysqli_prepare($link, $getSysBal)){
-			
-			// Attempt to execute the prepared statement
-			if(mysqli_stmt_execute($getSysBalStmt)){
-				/* store result */
-				mysqli_stmt_store_result($getSysBalStmt);
-				mysqli_stmt_bind_result($getSysBalStmt, $system_balance);
-				mysqli_stmt_fetch($getSysBalStmt);
-			} else{
-				echo "Oops! Something went wrong. Please try again later.";
-			}
-		}
-		// Close statement
-		mysqli_stmt_close($getSysBalStmt);
-		
-		
 		if($made_trans == false){
 			$userAccountArea .= "There haven't been any transactions yet.";
 		}
-		$userAccountArea .= '</ul><br><br><h4>The system made $' . $system_balance . ' in commission.<br>The current commission is '
-		. $system_commission . '% of any transaction.</h4><br><br><br>';
 		
 	} else{
 		echo "Oops! Something went wrong. Please try again later.";
@@ -154,9 +163,6 @@ if($sqlStmt = mysqli_prepare($link, $sql)){
 // Close statement
 mysqli_stmt_close($sqlStmt);
 
-$userAccountArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input style="width:50px;" type="number" name="newCommission" value="' . $system_commission . '" min="0" max="100">%
-			<input type="submit" name="changeCommission" class="btn" value="Change The Commission"></form>';
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){

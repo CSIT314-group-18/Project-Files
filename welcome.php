@@ -151,7 +151,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 						mysqli_stmt_close($getRenteeSqlStmt);
 						
 						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
-						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission of ' . $system_commission . '%)</li><br><br>';
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission.)</li><br><br>';
 
 					}
 					
