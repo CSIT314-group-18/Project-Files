@@ -120,7 +120,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 				$carTypeSearchString .= " " . $key . " = '" . $value . "' AND";
 				$emptyCarTypeArray = false;
 			}
-		}
+		}
+
 		$carTypeSearchString = substr($carTypeSearchString, 0, -4);
 		
 		
@@ -300,14 +301,14 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			mysqli_stmt_close($getLocSqlStmt);
 			
 			$textArea .= "<div class='carArea'><ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li><li>" . $street . ", " . $suburb . 
-			", " . $postcode . ", " . $city . ", " . $country . "<br><br></li><li>" . $year . " " . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
+			", " . $postcode . ", " . $city . ", " . $country . "<br></li><li>" . $year . " " . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
 			$textArea .= "<li>Odometer: " . $odometer . 'km<br>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
 			</form></div></li></ul>';
 			$textArea .= '<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="requestBooking" class="btn" value="View More Info / Request">
+			<br><input type="submit" name="requestBooking" class="btn" value="View More Info / Request">
 			</form></div><br><br><hr>';
 		}
 		$textArea .= "<br><br>";
@@ -340,9 +341,9 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>Our current available cars:</h1>
+        <h1><img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png">Our current available cars:</h1>
     </div>
-	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+	<div style="position: absolute; left: 32px; top: 132px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
@@ -390,7 +391,7 @@ mysqli_close($link);
 	
 	<p><?php echo $textArea; ?></p>
 	
-	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+	<div style="position: absolute; left: 9px; bottom: -194px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>
 </body>

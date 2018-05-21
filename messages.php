@@ -227,9 +227,9 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>Your Messages</h1>
+        <h1><img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png">Your Messages</h1>
     </div>
-	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+	<div style="position: absolute; left: 25px; top: 429px; border: 3px;">
 	<p><a href="/car_list_main.php" class="btn">See All Cars</a>
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
@@ -242,7 +242,7 @@ mysqli_close($link);
 	<?php echo $msgArea; ?>
 	</div>
 	
-	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+	<div style="position: absolute; left: 576px; bottom: -3px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>
 </body>

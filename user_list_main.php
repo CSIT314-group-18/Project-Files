@@ -204,7 +204,7 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>All Users</h1>
+        <h1><img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png">All Users</h1>
     </div>
 	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
