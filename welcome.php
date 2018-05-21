@@ -43,7 +43,7 @@ if($_SESSION['isAdmin'] == true){
 
 //if it's the system, then give them special options
 if($users_id == 1){
-	$adminArea .= "<p><a href='/sys_report.php' class='btn'>View Logs</a></p>";
+	$adminArea .= "<p><br><br><br><a href='/sys_report.php' class='btn'>View Logs</a></p>";
 }
 
 //make the verify form hidden if the user is already verified
@@ -1669,7 +1669,7 @@ mysqli_close($link);
 		<p><?php echo $userAccountArea; ?></p>
 		</div>
 		
-		<div style="position: absolute; left: 898px; top: 248px; border: 3px;">
+		<div style="position: absolute; left: 858px; top: 189px; border: 3px;">
 			<p><a href="/car_list_main.php" class="btn">See All Cars</a>
 			<?php echo $adminArea; ?>
 			<p><a href="/messages.php" class="btn">See Your Messages</a>

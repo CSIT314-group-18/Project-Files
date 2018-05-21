@@ -206,7 +206,7 @@ mysqli_close($link);
     <div class="page-header">
         <h1><img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png">All Users</h1>
     </div>
-	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+	<div style="position: absolute; left: 48px; top: 132px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
@@ -218,14 +218,14 @@ mysqli_close($link);
 			Postcode<input type="text" name="postcode" class="form-control">
 			City<input type="text" name="city" class="form-control">
 			Country<input type="text" name="country" class="form-control">
-			<input type="submit" name="locationSearch" class="btn btn-primary" value="Search">
+			<br><input type="submit" name="locationSearch" class="btn btn-primary" value="Search">
 			</form>
 		</div>
 	
 	
 	<p><?php echo $textArea; ?></p>
 	
-	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+	<div style="position: absolute; left: 52px; bottom: 44px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>
 </body>

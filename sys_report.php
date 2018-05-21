@@ -354,7 +354,7 @@ mysqli_close($link);
     <div class="page-header">
         <h1><img src="1_Primary_logo_on_transparent_427x63.png" alt="" width="413" height="63" longdesc="1_Primary_logo_on_transparent_427x63.png">All Transactions</h1>
     </div>
-	<div style="position: absolute; left: 12px; top: 191px; border: 3px;">
+	<div style="position: absolute; left: 8px; top: 91px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
@@ -373,7 +373,7 @@ mysqli_close($link);
 	
 	<p><?php echo $userAccountArea; ?></p>
 	
-	<div style="position: absolute; left: 551px; bottom: 131px; border: 3px;">
+	<div style="position: absolute; left: 1150px; bottom: 600px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>
 </body>
