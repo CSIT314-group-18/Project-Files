@@ -89,7 +89,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			}
 			
 			if(!empty($showDayParam)){
-				$showDayArea = "<br><br><h4>The Owner of this car has specified that it can't be booked<br>on the following days:<h4><h5>" . $showDayParam . "</h5>";
+				$showDayArea = "<br><br><br><br><br><br><h4>The Owner of this car has specified that it can't be booked<br>on the following days:<h4><h5>" . $showDayParam . "</h5>";
 			}
 			
 			$textArea .= "<div class='page-header'>
@@ -510,7 +510,8 @@ mysqli_close($link);
  
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>
+
     <meta charset="UTF-8">
     <title>Welcome</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
@@ -531,25 +532,25 @@ mysqli_close($link);
 	</script>
 </head>
 <body>
-	<div style="position: absolute; left: 10px; top: 10px; border: 3px;">
+	<div style="position: absolute; left: 105px; top: 376px; border: 3px;">
 	<p><a href="welcome.php" class="btn">See your Account</a></p>
 	</div>
 	
-	<div style = "position: absolute; top:12%;left: 10px;" align = "right">
+	<div style = "position: absolute; top: 207px; left: 110px;" align = "right">
 		<p><?php echo $msgOwnerArea; ?></p>
 	</div>
 	
-	<p><?php echo $textArea; ?></p>
+	<p><img src="1_Primary_logo_on_transparent_427x63.png" alt="" width="413" height="63" longdesc="1_Primary_logo_on_transparent_427x63.png" align="left"><?php echo $textArea; ?></p>
 	
 	
 	
 	<form action= "<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-		Start date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="startdate" value="<?php echo $param_startdate; ?>"> <br>
-		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate" value="<?php echo $param_enddate; ?>"> <br>
+		Start date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="startdate" value="<?php echo $param_startdate; ?>"> <br><br>
+		End date: <input type="date" min="<?php echo date("Y-m-d"); ?>" name="enddate" value="<?php echo $param_enddate; ?>"> <br><br>
 		<input type="submit" name="showAmount" class="btn" value="Estimate Cost">
-		<input type="submit" name="reqConf" class="btn btn-primary" value="Confirm Request">
+	  <input type="submit" name="reqConf" class="btn btn-primary" value="Confirm Request">
 	</form>
-	<p><?php echo $showAmountArea; ?></p>
+	<br><p><?php echo $showAmountArea; ?></p>
 	<div style="position: absolute; left: 10px;">
 		<?php echo $showBookedArea; ?>
 	</div>
@@ -560,7 +561,7 @@ mysqli_close($link);
 		</div>
 	</div>
 	
-	<div style="position: absolute; left: 10px; bottom: 10px; border: 3px;">
+	<div style="position: absolute; left: 589px; bottom: 22px; border: 3px;">
 	<p><a href="logout.php" class="btn btn-danger">Sign Out of Your Account</a></p>
 	</div>
 </body>

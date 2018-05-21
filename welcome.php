@@ -43,7 +43,7 @@ if($_SESSION['isAdmin'] == true){
 
 //if it's the system, then give them special options
 if($users_id == 1){
-	$adminArea .= "<p><a href='/sys_report.php' class='btn'>See The Logs</a></p>";
+	$adminArea .= "<p><a href='/sys_report.php' class='btn'>View Logs</a></p>";
 }
 
 //make the verify form hidden if the user is already verified
@@ -73,7 +73,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 		mysqli_stmt_store_result($getCarSqlStmt);
 		mysqli_stmt_bind_result($getCarSqlStmt, $car_id, $model, $manufacturer, $transmission, $odometer, $status, $days_na);
 		if(mysqli_stmt_num_rows($getCarSqlStmt) != 0){
-                    $textArea = "<label>Your current cars:</label>";
+                    $textArea = "<label><br><br><br><br><br><br><br>Your current cars:</label>";
 		}
 		//populate the html text field variable
 		while(mysqli_stmt_fetch($getCarSqlStmt)){
@@ -151,7 +151,7 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 						mysqli_stmt_close($getRenteeSqlStmt);
 						
 						$carTransLog .= '<li>Recieved <b>$' . $temp_fee . '</b><br>from ' . $temp_rentername . '<br>for the dates <br><b>'
-						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission.)</li><br><br>';
+						. date('D d/m/Y', $temp_startdate) . '<br>to ' . date('D d/m/Y', $temp_enddate) .  '</b><br>(Including system<br>commission of ' . $system_commission . '%)</li><br><br>';
 
 					}
 					
@@ -167,35 +167,35 @@ if($getCarSqlStmt = mysqli_prepare($link, $getCarSql)){
 			
 			$textArea .= "<ul style='list-style-type:none'><li>" . $prelimPhotoArea . "</li>
 			<li>" . $model . "</li><li>" . $manufacturer . "</li><li>" . $transmission . "</li>";
-			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
-			<div id="odoChange' . $car_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="number" name="odo" class="form-control" value= "' . $odometer . '">
-			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="odoChange" class="btn" value="Submit"></form></div></li>
-			<li>' . $status . '&nbsp;&nbsp;&nbsp;<button class="btn btn-primary" onclick="showChanger(' . "'statusChange'," . $car_id . ')">List/Unlist Car</button>
-			<div id="statusChange' . $car_id . '" style="display:none">
-			<p>Are you sure you want to<br> switch your cars listed status?<br> (you can change it again later)</p>
+			$textArea .= "<li>" . $odometer . '&nbsp;&nbsp;&nbsp;<br><button class="btn btn-primary" onclick="showChanger(' . "'odoChange'," . $car_id . ')">Update Odometer</button>
+			<div id="odoChange' . $car_id . '" style="display:none"><br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<br><input type="number" name="odo" class="form-control" value= "' . $odometer . '">
+			<br><input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<br><input type="submit" name="odoChange" class="btn" value="Submit"></form></div></li>
+			<li>' . $status . '&nbsp;&nbsp;&nbsp;<br><button class="btn btn-primary" onclick="showChanger(' . "'statusChange'," . $car_id . ')">List/Unlist Car</button>
+			<br><div id="statusChange' . $car_id . '" style="display:none">
+			<br><p>Are you sure you want to<br> switch your cars listed status?<br> (you can change it again later)</p>
 			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="hidden" name="status" class="form-control" value= "' . $status . '">
-			<input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<br><input type="hidden" name="status" class="form-control" value= "' . $status . '">
+			<br><input type="hidden" name="this_car_id" value="' . $car_id . '">
 			<input type="submit" name="statusChange" class="btn" value="Change status"></form></div></li>
 			
-			<li><button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
+			<li><br><button class="btn btn-primary" onclick="showChanger(' . "'photoChange'," . $car_id . ')">Change Photo</button>
 			<div id="photoChange' . $car_id . '" style="display:none">
-			<form enctype="multipart/form-data" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="file" style="width:200px;" class="form-control" name="' . $car_id . '">
-			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div></li>
+			<br><form enctype="multipart/form-data" action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<br><input type="file" style="width:200px;" class="form-control" name="' . $car_id . '">
+			<br><input type="hidden" name="this_car_id" value="' . $car_id . '">
+			<br><input type="submit" name="photoChange" class="btn" value="Change Photo"></form></div></li>
 			
-			<li><button class="btn btn-primary" onclick="showChanger(' . "'days_na'," . $car_id . ')">Change Days <br>Your Car is Available</button>
+			<li><br><button class="btn btn-primary" onclick="showChanger(' . "'days_na'," . $car_id . ')">Change Days <br>Your Car is Available</button>
 			<div id="days_na' . $car_id . '" style="display:none">
-			<form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<br><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
 			' . $tempCheckBoxArea . '
 			<input type="hidden" name="this_car_id" value="' . $car_id . '">
-			<input type="submit" name="days_na" class="btn" value="Change Available Days"></form></div></li>
+			<br><input type="submit" name="days_na" class="btn" value="Change Available Days"></form></div></li>
 			
-			<li><button class="btn" onclick="showChanger(' . "'showCarTrans'," . $car_id . ')">Show Car<br>Transaction Log</button>
-			<div id="showCarTrans' . $car_id . '" style="display:none;overflow-y:scroll;bottom-margin:20;">
+			<li><br><button class="btn" onclick="showChanger(' . "'showCarTrans'," . $car_id . ')">Show Car<br>Transaction Log</button>
+			<br><div id="showCarTrans' . $car_id . '" style="display:none;overflow-y:scroll;bottom-margin:20;">
 			<ol style="list-style-type:none">
 			' . $carTransLog . '</ol></div></li>
 			
@@ -263,39 +263,39 @@ if($getuserInfoSqlStmt = mysqli_prepare($link, $getuserInfoSql)){
 			
 			$userAccountArea .= "<h3>" . $fname . " " . $lname . "</h3><ul style='list-style-type:none'><li style='border: 2px solid grey;'>Your Balance is $" . $balance . "<br></li>
 			<li>" . htmlspecialchars($_SESSION["username"]) . 
-			'&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'unameChange'," . $users_id . ')">Change Username</button>
+			'&nbsp;&nbsp;&nbsp;<br><br><button class="btn" onclick="showChanger(' . "'unameChange'," . $users_id . ')">Change Username</button>
 			<div id="unameChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="text" name="newUname" class="form-control">
-			<input type="submit" name="unameChange" class="btn btn-primary" value="Submit Username Change"></form><br><br></div></li>
-			<li><button class="btn" onclick="showChanger(' . "'pwordChange'," . $users_id . ')">Change Password</button>
-			<div id="pwordChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
+			<br><input type="text" name="newUname" class="form-control">
+			<br><input type="submit" name="unameChange" class="btn btn-primary" value="Submit Username Change"></form><br><br></div></li>
+			<br><li><button class="btn" onclick="showChanger(' . "'pwordChange'," . $users_id . ')">Change Password</button>
+			<br><div id="pwordChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post"><br>
 			Your password now
-			<input type="password" name="oldPword" class="form-control"><br><br>
+			<br><input type="password" name="oldPword" class="form-control"><br>
 			New Password
-			<input type="password" name="newPword1" class="form-control">
-			Retype new password
+			<br><input type="password" name="newPword1" class="form-control">
+			<br>Retype new password
 			<input type="password" name="newPword2" class="form-control">
-			<input type="submit" name="pwordChange" class="btn btn-primary" value="Submit Password Change"></form><br><br></div></li>
-			<li>' . $facebook . '&nbsp;&nbsp;&nbsp;<button class="btn" onclick="showChanger(' . "'fbChange'," . $users_id . ')">Change Facebook Link</button>
+			<br><input type="submit" name="pwordChange" class="btn btn-primary" value="Submit Password Change"></form><br></div></li>
+			<li>' . $facebook . '&nbsp;&nbsp;&nbsp;<br><button class="btn" onclick="showChanger(' . "'fbChange'," . $users_id . ')">Update Social Media Link Link</button>
 			<div id="fbChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			<input type="text" name="newFb" class="form-control" value="' . $facebook . '">
-			<input type="submit" name="fbChange" class="btn btn-primary" value="Change Facebook Link"></form><br><br></div></li>
+			<br><input type="text" name="newFb" class="form-control" value="' . $facebook . '">
+			<br><input type="submit" name="fbChange" class="btn btn-primary" value="Update Social Media Link"></form><br><br></div></li>
 			
-			<li><button class="btn" onclick="showChanger(' . "'ccInfoChange'," . $users_id . ')">Change Credit Card Info</button>
+			<li><br><button class="btn" onclick="showChanger(' . "'ccInfoChange'," . $users_id . ')">Change Credit Card Info</button>
 			<div id="ccInfoChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			Card Number<input type="number" name="newCcNum" class="form-control" value="' . $cc_info_array[0] . '">
+			<br>Card Number<input type="number" name="newCcNum" class="form-control" value="' . $cc_info_array[0] . '"><br>
 			Security Code<input type="number" style="width:100px;" name="newCcSec" class="form-control" value="' . $cc_info_array[1] . '">
-			<input type="submit" name="ccInfoChange" class="btn btn-primary" value="Change Credit Card Info"></form><br><br></div></li>
+			<br><input type="submit" name="ccInfoChange" class="btn btn-primary" value="Change Credit Card Info"></form><br><br></div></li>
 			
 			<li><h3>Your Location</h3><br>' . $street . '<br>' . $suburb . '<br>' . $postcode . '<br>' . $city . '<br>' . $country . '<br>' . '
 			<button class="btn" onclick="showChanger(' . "'addressChange'," . $users_id . ')">Change Address</button>
 			<div id="addressChange' . $users_id . '" style="display:none"><form action="' . htmlspecialchars($_SERVER["PHP_SELF"]) . '" method="post">
-			Street<input type="text" name="street" class="form-control" value="' . $street . '">
-			Suburb<input type="text" name="suburb" class="form-control" value="' . $suburb . '">
-			Postcode<input type="text" name="postcode" class="form-control" value="' . $postcode . '">
-			City<input type="text" name="city" class="form-control" value="' . $city . '">
-			Country<input type="text" name="country" class="form-control" value="' . $country . '">
-			<input type="submit" name="addressChange" class="btn btn-primary" value="Change Address"></form><br><br></div></li>
+			<br>Street<input type="text" name="street" class="form-control" value="' . $street . '">
+			<br>Suburb<input type="text" name="suburb" class="form-control" value="' . $suburb . '">
+			<br>Postcode<input type="text" name="postcode" class="form-control" value="' . $postcode . '">
+			<br>City<input type="text" name="city" class="form-control" value="' . $city . '">
+			<br>Country<input type="text" name="country" class="form-control" value="' . $country . '">
+			<br><input type="submit" name="addressChange" class="btn btn-primary" value="Change Address"></form><br><br></div></li>
 			</ul>';
 			
 			
@@ -1633,13 +1633,13 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Welcome to our site.</h1>
+       <img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png"> <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Welcome to our site.</h1>
     </div>
 	
 	<?php echo $suspendedArea; ?>
 	<?php echo $dummyPaymentArea; ?>
 	
-		<div style = "position: absolute; left: 10px;"  align = "right">
+		<div style = "position: absolute; left: 848px; top: 228px;"  align = "left">
 			<p><?php echo $textArea; ?></p>
 			
 			<div <?php echo $divArea; ?>>
@@ -1649,28 +1649,27 @@ mysqli_close($link);
 						<input type="text" name="email"class="form-control" value="<?php echo $email; ?>">
 						<span class="help-block"><?php echo $email_err; ?></span>
 					</div> 
-					<div class="form-group">
+					<div class="form-group"; align = "center">
 							<input type="submit" name="emailVerify" class="btn btn-primary" value="Submit">
 					</div>
 				</form>
 			</div>
 			
-			<div <?php echo $verifiedArea; ?>>
 			<p><a href="add_car.php" class="btn">Add a car available for rent</a></p>
-			</div>
+		</div>
 		</div>
 		
-		<div style = "position: absolute; right: 10px;">
+<div style = "position: absolute; right: 10px;">
 		<p><?php echo $incomingReserv; ?></p>
 		</div>
 		
-		<div style="padding-left: 40%;padding-right: 40%;" align = "right">
+<div style="padding-left: 24%;padding-right: 40%;" align = "left">
 		<p><?php echo $incomingPay; ?></p>
-		<p><?php echo $ratingArea; ?></p>
+		<p> <?php echo $ratingArea; ?></p>
 		<p><?php echo $userAccountArea; ?></p>
 		</div>
 		
-		<div <?php echo $verifiedArea; ?> style="position: absolute; left: 10px; top: 10px; border: 3px;">
+		<div style="position: absolute; left: 898px; top: 248px; border: 3px;">
 			<p><a href="/car_list_main.php" class="btn">See All Cars</a>
 			<?php echo $adminArea; ?>
 			<p><a href="/messages.php" class="btn">See Your Messages</a>
@@ -1678,7 +1677,7 @@ mysqli_close($link);
 		</div>
 		<br><br><br>
 		<a href="/logout.php" class="btn">Sign Out of Your Account</a>
-		<div style="position: absolute; padding: 10px; right: 10px; bottom: 10px; border: 3px;">
+		<div style="position: absolute; padding: 10px; right: 263px; bottom: -291px; border: 3px;">
 			<?php echo $deleteAccountArea; ?>
 		</div>
 		

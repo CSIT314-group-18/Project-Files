@@ -220,7 +220,7 @@ mysqli_close($link);
 </head>
 <body>
     <div class="page-header">
-        <h1>Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Please enter your car information below:</h1>
+        <h1><img src="1_Primary_logo_on_transparent_427x63.png" width="413" height="63" alt="" longdesc="1_Primary_logo_on_transparent_427x63.png">Hi, <b><?php echo htmlspecialchars($_SESSION['username']); ?></b>. Please enter your car information below:</h1>
     </div>
 	<form enctype="multipart/form-data" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
 		<div class="form-group <?php echo (!empty($car_err)) ? 'has-error' : ''; ?>">
@@ -423,7 +423,7 @@ mysqli_close($link);
 				<option value="1901">1901</option>
 				<option value="1900">1900</option>
 			   </select></li
-			<li><input type="text" id="odometer" name="odometer" class="form-control" placeholder="Current odometer reading (km)" required></li>
+			><li><input type="text" id="odometer" name="odometer" class="form-control" placeholder="Current odometer reading (km)" required></li>
 			</ul>
 			<span class="help-block"><?php echo $car_err; ?></span>
 		</div> 
