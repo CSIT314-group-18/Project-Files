@@ -1,0 +1,9 @@
+- Create demo
+- Create Tables
+- Add keys
+- Insert locations
+- Insert Users
+- Insert Cars
+- Insert reservations
+
+There seems to be errors with duplicates being inserted, but that isnt the priority now.
