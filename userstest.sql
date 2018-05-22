@@ -96,8 +96,8 @@ INSERT INTO `users` VALUES
 ('97','aimee.dare','3532pson','Judge','Goldner','05050gqsu','0','1','2017-12-26 07:36:22','97','"https://www.facebook.com/"',NULL,'97'),
 ('98','cathryn74','5502xdge','Alba','Turcotte','47226ekug','0','1','2017-08-08 05:12:17','98','"https://www.facebook.com/"',NULL,'98'),
 ('99','verda39','9045ryfz','Arianna','Wintheiser','13755nllh','0','1','2018-05-20 04:19:49','99','"https://www.facebook.com/"',NULL,'99'),
-('100','dejon54','1332zvsb','Ressie','Ritchie','26532yrek','0','1','2018-01-13 12:56:15','100','"https://www.facebook.com/"',NULL,'100');
-('101','tjy999','abc123','Tim','Yates','ABC123','0','1','2018-01-13 12:56:16','101','"https://www.facebook.com/"',NULL,'101');
+('100','dejon54','1332zvsb','Ressie','Ritchie','26532yrek','0','1','2018-01-13 12:56:15','100','"https://www.facebook.com/"',NULL,'100'),
+('101','tjy999','abc123','Tim','Yates','ABC123','0','1','2018-01-13 12:56:16','101','"https://www.facebook.com/"',NULL,'101'),
 ('102','jty999','abc124','Jim','Gates','ABC124','0','1','2018-01-13 12:56:17','101','"https://www.facebook.com/"',NULL,'102');
 
 

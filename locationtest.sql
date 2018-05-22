@@ -101,7 +101,7 @@ INSERT INTO `location` VALUES
 ('97','899 Stamm Stravenue Apt. 887','Kenwick','6107','Perth','Australia','97'),
 ('98','5860 Murray Points Suite 558','Gosnells','6110','Perth','Australia','98'),
 ('99','4253 Vladimir Bypass Suite 408','Gosnells','6110','Perth','Australia','99'),
-('100','8536 Mohr Knolls','Gosnells','6110','Perth','Australia','100'); 
+('100','8536 Mohr Knolls','Gosnells','6110','Perth','Australia','100'),
 ('101','8 Edna Avenue','Penshurst','2222','Sydney','Australia','101'),
-('102','89 King Street','Hurstville','2220','Sydney','Australia','102'),
+('102','89 King Street','Hurstville','2220','Sydney','Australia','102');
 
